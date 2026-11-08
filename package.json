@@ -1,0 +1,10 @@
+{
+  "name": "voice-workspace",
+  "private": true,
+  "scripts": {
+    "build:ui": "npm --prefix apps/frontend run build",
+    "test:ui:unit": "npm --prefix apps/frontend exec -- ng test --watch=false",
+    "test:backend:focused:voice-capture": ".\\apps\\backend\\.venv\\Scripts\\python.exe -m pytest -c tests/backend/pytest.ini --confcutdir=tests/backend tests/backend/focused/voice_capture",
+    "test:ui:focused:voice-capture": "npm --prefix apps/frontend run test:ui:focused:voice-capture"
+  }
+}

@@ -1,10 +1,12 @@
 # Web Voice Chatbot
 
-A planned English-only, web-based voice chatbot built on [Pipecat](https://github.com/pipecat-ai/pipecat). Users will speak through their browser microphone and hear spoken responses. Initial scope excludes user authentication, typed chat, video, and multilingual support. Accessible start, stop, mute, connection status, and error controls remain part of the voice interface.
+An English-only, web-based voice chatbot project built on [Pipecat](https://github.com/pipecat-ai/pipecat). The first application increment captures browser audio while Space is held and streams it to FastAPI. Spoken responses remain planned. Scope excludes user authentication, typed chat, video, multilingual support, and multi-tenancy.
 
 ## Current status
 
-This repository contains the imported Pipecat Python framework, its examples, and tests. The application-specific browser client, voice pipeline configuration, model selection, Docker images, and Docker Compose deployment have not yet been implemented. There is no application startup command or verified hardware benchmark yet.
+The repository contains the imported Pipecat framework plus an Angular 21 / Angular Material push-to-talk client in `apps/frontend` and a FastAPI WebSocket API in `apps/backend`. The browser uses Web Audio and an AudioWorklet to stream mono 16 kHz PCM16 only while Space is held; key release and focus loss stop microphone tracks. PostgreSQL stores session metadata through SQLAlchemy, with Alembic managing the single application database. Audio passes through a Pipecat pipeline with Silero VAD and local Smart Turn v3 endpointing and is not stored. Browser capture requests AEC, noise suppression, and automatic gain control before 16 kHz PCM16 encoding.
+
+Dockerfiles and [Compose configuration](compose.yaml) package the frontend, API, migration job, and PostgreSQL. See [application setup and transport contract](docs/voice-capture.md) for working startup commands. The backend image builds on Docker Desktop?s Linux engine, and CPU pipeline startup, PCM ingestion, and cleanup were smoke-tested inside it. Full PostgreSQL/Compose workflow verification remains separate. Speech recognition, response generation, spoken replies, and hardware benchmarks remain unimplemented. CPU audio analysis is integrated; physical acoustic quality and speech endpoint accuracy remain to be measured.
 
 The intended workflow is Windows development in VS Code with Docker Desktop, followed by deployment of Linux containers using Docker Compose on a Linux host. The target hardware is an Intel Core Ultra 5 processor with Intel Arc graphics. Exact hardware variants and available memory remain to be confirmed.
 
@@ -16,7 +18,7 @@ The intended workflow is Windows development in VS Code with Docker Desktop, fol
 4. A language model generates a response, and speech synthesis streams English audio back to the browser.
 5. Interruption handling stops obsolete speech when the user speaks again; stopping or disconnecting releases session resources.
 
-Transport, model providers, and application API contracts must be selected and documented during implementation. Reuse Pipecat's asynchronous streaming model. Prefer local inference where practical for this hardware; any external service dependency must be explicit and configurable.
+The initial transport is a bounded WebSocket PCM stream; its [contract](docs/voice-capture.md#api-and-websocket-contract) is implemented with Pipecat audio analysis; recognition and spoken response stages remain planned. Future integration must reuse Pipecat's asynchronous streaming model. Prefer local inference where practical for this hardware; any external service dependency must be explicit and configurable.
 
 ## Development and deployment
 
@@ -42,6 +44,8 @@ For each candidate configuration, measure time to first audible response, speech
 ## Repository guide
 
 - [AGENTS.md](AGENTS.md): project objectives, engineering constraints, documentation maintenance, and skill routing.
+- [Documentation index](docs/index.md): application setup, API contract, persistence, and verification.
+- [apps/](apps/): Angular Material client and FastAPI application.
 - `.agents/skills/`: preserved local implementation and testing guidance.
 - [src/pipecat/](src/pipecat/): imported Pipecat implementation.
 - [examples/](examples/): upstream examples; these are references rather than the finished chatbot.
@@ -53,7 +57,7 @@ For each candidate configuration, measure time to first audible response, speech
 
 Follow the repository testing skill and the relevant implementation skills. During application development, verify microphone permission failures, connection failures, silence, English speech input/output, user interruptions, session stop/reconnect, and resource cleanup. Use Playwright for browser flows and inspect substantial UI changes at desktop and narrower widths. Test CPU fallback and Intel acceleration separately; report unverified environments explicitly.
 
-Keep this README current in the same change as project behavior, contracts, configuration, deployment, or operational instructions. Distinguish plans from implemented behavior, verify links and commands, and link to authoritative detailed documentation instead of duplicating it. Add a documentation index when the project needs additional guides.
+Keep this README current in the same change as project behavior, contracts, configuration, deployment, or operational instructions. Distinguish plans from implemented behavior, verify links and commands, and link to authoritative detailed documentation instead of duplicating it.
 
 ## Upstream and license
 

@@ -41,6 +41,11 @@ share/python-wheels/
 MANIFEST
 .DS_Store
 .env*
+!.env.example
+node_modules/
+.angular/
+test-results/
+playwright-report/
 fly.toml
 
 # Examples
