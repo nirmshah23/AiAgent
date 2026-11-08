@@ -6,7 +6,15 @@
 
 The browser connects before requesting microphone access. Holding Space requests mono microphone audio, creates a 16 kHz Web Audio `AudioContext`, and uses an AudioWorklet to encode signed 16-bit little-endian PCM. Releasing Space stops tracks, disconnects nodes, closes the context, and prevents queued worklet messages from being transmitted. Key repeat is ignored. Blur, hidden documents, page exit, microphone removal, and session termination also stop capture. Permission prompts may outlast a press; audio from a late permission result is stopped without transmission. Space on interactive controls retains normal keyboard behavior; move focus outside a button to talk.
 
-The backend validates frames and runs a per-connection Pipecat pipeline using Silero VAD and `LocalSmartTurnAnalyzerV3` on CPU. It does **not** run speech recognition, an LLM, synthesis, or playback yet. No audio or transcripts are persisted. Only the session UUID, start/end timestamps, completion status, and received byte count are stored after each connection ends. Process crashes can lose this final metadata; active sessions are not durable. No historical session browsing API is provided.
+The backend validates frames and runs a per-connection Pipecat pipeline using Silero VAD and `LocalSmartTurnAnalyzerV3` on CPU. Vosk performs local English speech recognition on CPU before the user aggregator. An LLM, synthesis, and playback remain unimplemented. No audio or transcripts are persisted. Only the session UUID, start/end timestamps, completion status, and received byte count are stored after each connection ends. Process crashes can lose this final metadata; active sessions are not durable. No historical session browsing API is provided.
+
+## English speech recognition
+
+Install the pinned backend requirements and download the [small US English model](https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip). Extract it into the repository's ignored `models/` directory so `models/vosk-model-small-en-us-0.15/am/final.mdl` exists. This is a CPU baseline, not a measured best model for the target hardware. Only an English model is supported; language follows the installed weights rather than automatic detection.
+
+Set `VOSK_MODEL_PATH` to the absolute extracted model directory for native development. Compose mounts `./models` read-only at `/models` and sets the corresponding container path. Download/extraction is a prerequisite on both Windows and Linux; sessions never download weights. A missing or invalid model prevents pipeline creation. Weights are shared within the process, with a separate recognizer per connection. Restart the API after changing weights.
+
+The Pipecat processor sends preprocessed mono 16 kHz PCM16 to Vosk in order, decodes off the event loop, and emits nonempty final `TranscriptionFrame` objects to the existing user aggregator. Vosk endpoint results are emitted while streaming; releasing Space explicitly finalizes pending words before synthetic silence. Transcripts are internal only: they are neither persisted, logged by this adapter, nor sent to the browser. Disconnect cancels pending speech rather than delivering a final transcript. Browser controls and WebSocket messages are unchanged. No partial transcript UI or response generation is implemented.
 
 ## Local Windows development
 
@@ -20,6 +28,7 @@ $env:SETUPTOOLS_SCM_PRETEND_VERSION = '1.3.0.dev0'
 uv pip install --python apps/backend/.venv/Scripts/python.exe -e .
 $env:DATABASE_URL = 'postgresql+psycopg://voice:YOUR_PASSWORD@localhost:5432/voice'
 $env:ALLOWED_ORIGINS = 'http://localhost:4200'
+$env:VOSK_MODEL_PATH = (Resolve-Path models/vosk-model-small-en-us-0.15).Path
 Set-Location apps/backend
 .venv/Scripts/alembic upgrade head
 .venv/Scripts/uvicorn voice_api.main:app --host 127.0.0.1 --port 8000 --ws-max-size 16384
@@ -84,6 +93,6 @@ Capture requests browser `echoCancellation`, `noiseSuppression`, and `autoGainCo
 
 Web Audio converts the device stream to a mono 16 kHz context; the worklet clamps float samples to [-1, 1] and encodes PCM16 little-endian. This is the sole transport format, avoiding lossy codec latency. WAV, MP3, Opus, and other encoded payloads are unsupported: callers must decode/resample before sending. PCM magnitude alone cannot distinguish a mislabelled codec, so clients must obey the contract. Automatic gain control is streaming normalization, not offline peak or LUFS normalization.
 
-Pipecat owns asynchronous processing, interruption frames, and cleanup. Silero uses its default thresholds and a 0.2-second stop interval. Smart Turn uses its bundled v3.2 CPU model with one inference thread and `wait_for_transcript=False` because STT is not yet connected. Model construction runs off the event loop. Space remains the capture gate: while held, silence is available for natural endpointing. On release, up to 3.5 seconds of paced synthetic silence lets Smart Turn finish an incomplete turn without reopening the microphone; a new press cancels that tail. Silence is excluded from received byte metadata. A disconnected session cancels the pipeline and its analyzer resources. No audio is persisted; enabling `PIPECAT_SMART_TURN_LOG_DATA` is rejected.
+Pipecat owns asynchronous processing, interruption frames, and cleanup. Silero uses its default thresholds and a 0.2-second stop interval. Smart Turn uses its bundled v3.2 CPU model with one inference thread and `wait_for_transcript=False` to keep acoustic endpointing independent of Vosk text delivery. Model construction runs off the event loop. Space remains the capture gate: while held, silence is available for natural endpointing. On release, up to 3.5 seconds of paced synthetic silence lets Smart Turn finish an incomplete turn without reopening the microphone; a new press cancels that tail. Silence is excluded from received byte metadata. A disconnected session cancels the pipeline and its analyzer resources. No audio is persisted; enabling `PIPECAT_SMART_TURN_LOG_DATA` is rejected.
 
 The client currently ignores the additive speech/turn events. They do not generate a spoken response. Browser AEC/noise reduction quality, speech endpoint accuracy, concurrency, and Intel device acceleration require separate acceptance measurements. No GPU/NPU capability or latency target is claimed.

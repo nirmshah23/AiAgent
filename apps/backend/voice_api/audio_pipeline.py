@@ -19,6 +19,8 @@ from pipecat.turns.user_turn_strategies import UserTurnStrategies
 from pipecat.utils.env import env_truthy
 from pipecat.workers.runner import WorkerRunner
 
+from .vosk_stt import FlushRecognitionFrame, VoskSTT
+
 
 class AudioSink(FrameProcessor):
     """Acknowledge consumption so transport cannot queue unbounded audio."""
@@ -34,7 +36,7 @@ class AudioSink(FrameProcessor):
         await super().process_frame(frame, direction)
         if (
             direction == FrameDirection.DOWNSTREAM
-            and isinstance(frame, InputAudioRawFrame)
+            and isinstance(frame, (InputAudioRawFrame, FlushRecognitionFrame))
             and frame.id == self.expected_id
         ):
             self.consumed.set()
@@ -49,6 +51,7 @@ class AudioPipeline:
         # Raw-audio debug logging must never be enabled by deployment environment.
         if env_truthy("PIPECAT_SMART_TURN_LOG_DATA"):
             raise ValueError("Smart Turn audio logging is disabled for this application")
+        self.stt = VoskSTT()
         self.analyzer = LocalSmartTurnAnalyzerV3(cpu_count=1)
         user = LLMUserAggregator(
             LLMContext(),
@@ -75,7 +78,7 @@ class AudioPipeline:
 
         self.sink = AudioSink()
         self.worker = PipelineWorker(
-            Pipeline([user, self.sink]),
+            Pipeline([self.stt, user, self.sink]),
             params=PipelineParams(audio_in_sample_rate=16000, audio_out_sample_rate=16000),
             idle_timeout_secs=None,
             enable_rtvi=False,
@@ -92,12 +95,15 @@ class AudioPipeline:
 
     async def feed(self, data):
         """Wait for downstream consumption of one PCM frame."""
+        await self._consume(InputAudioRawFrame(data, 16000, 1))
+
+    async def _consume(self, frame):
+        """Serialize audio and explicit recognition boundaries with acknowledgements."""
         async with self.lock:
             if self.running.done():
                 await self.running
                 raise RuntimeError("Audio pipeline stopped")
             self.sink.consumed.clear()
-            frame = InputAudioRawFrame(data, 16000, 1)
             self.sink.expected_id = frame.id
             await self.worker.queue_frame(frame)
             await asyncio.wait_for(self.sink.consumed.wait(), timeout=10)
@@ -108,6 +114,7 @@ class AudioPipeline:
 
     async def pause(self):
         """Supply bounded silence after microphone release."""
+        await self._consume(FlushRecognitionFrame())
 
         async def silence_tail():
             # Real-time silence lets Smart Turn's incomplete-turn fallback run
