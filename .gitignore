@@ -89,3 +89,6 @@ apps/backend/dialog-policy.local.json
 evals/release/test-runs/
 evals/turn-completion/test-runs/
 evals/llm-with-backend/test-runs/
+
+# Private latest-session testing audio and transcripts
+session-debug/

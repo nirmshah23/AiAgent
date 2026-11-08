@@ -6,3 +6,5 @@
 **/test-results
 **/dist
 apps/backend/dialog-policy.local.json
+
+session-debug/

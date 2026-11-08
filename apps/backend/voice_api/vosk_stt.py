@@ -35,6 +35,7 @@ class VoskSTT(FrameProcessor):
     def __init__(self):
         """Construct on the pipeline's model-loading worker thread."""
         super().__init__()
+        self.record_transcript = None
         self.recognizer = KaldiRecognizer(english_model(), 16000)
 
     def _decode(self, audio):
@@ -55,6 +56,8 @@ class VoskSTT(FrameProcessor):
             if result:
                 text = json.loads(result).get("text", "").strip()
                 if text:
+                    if self.record_transcript:
+                        await self.record_transcript("recognition", text)
                     await self.push_frame(
                         TranscriptionFrame(
                             text,

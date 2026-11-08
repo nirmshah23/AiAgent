@@ -33,6 +33,8 @@ services:
       PIPER_MODEL_PATH: /models/piper/en_US-lessac-medium.onnx
       PIPER_LENGTH_SCALE: ${PIPER_LENGTH_SCALE:-1.3}
       DIALOG_ENABLED: ${DIALOG_ENABLED:-true}
+      SESSION_DEBUG_ENABLED: ${SESSION_DEBUG_ENABLED:-true}
+      SESSION_DEBUG_DIR: /session-debug
       MAX_VOICE_SESSIONS: ${MAX_VOICE_SESSIONS:-2}
       DIALOG_API_MODE: ${DIALOG_API_MODE:-simulated}
       LAYA_MODEL_PATH: /models/laya
@@ -44,6 +46,7 @@ services:
       BUSINESS_API_HEADERS: ${BUSINESS_API_HEADERS:-}
     volumes:
       - ./models:/models:ro
+      - ./session-debug:/session-debug
     depends_on:
       migrate:
         condition: service_completed_successfully

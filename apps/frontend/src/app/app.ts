@@ -1,15 +1,20 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AudioSession } from './audio-session';
+import { IntentSettings } from './intent-settings';
 
 @Component({
   selector: 'app-root', standalone: true,
-  imports: [MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [MatButtonModule, MatCardModule, MatToolbarModule, IntentSettings],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <mat-toolbar><span class="brand">◉ Voice</span><span class="toolbar-note">Audio workspace</span></mat-toolbar>
+    @if (settings()) {
+      <app-intent-settings (closed)="settings.set(false)" />
+    } @else {
+    <div style="text-align:right; padding:12px 6% 0"><button mat-button (click)="settings.set(true)" [disabled]="audio.connected() || audio.connecting()">Intent settings</button></div>
     <main>
       <header class="introduction">
       <p class="eyebrow">PUSH TO TALK · ENGLISH</p>
@@ -41,13 +46,15 @@ import { AudioSession } from './audio-session';
         <div><span class="step">03</span><h3>Stay in control</h3><p>Leaving this window stops capture. End the session when finished.</p></div>
       </section></details>
       <footer>Voice conversation · English speech responses.<br>Session metadata is saved. Audio is streamed and discarded.</footer>
-    </main>`,
+    </main> }`,
 })
 export class AppComponent implements OnDestroy {
   readonly audio = inject(AudioSession);
+  readonly settings = signal(false);
 
   @HostListener('window:keydown', ['$event'])
   keydown(event: KeyboardEvent): void {
+    if (this.settings()) return;
     if (event.code !== 'Space' || event.altKey || event.ctrlKey || event.metaKey) return;
     const target = event.target;
     if (target instanceof HTMLElement && target.closest('button, input, textarea, select, a, [contenteditable="true"]')) return;

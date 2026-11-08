@@ -36,7 +36,10 @@ class EntityField(ConfigModel):
     def validate_pattern(self):
         """Compile administrative patterns before accepting a configuration."""
         if self.regex:
-            re.compile(self.regex)
+            try:
+                re.compile(self.regex)
+            except re.error as exc:
+                raise ValueError("Invalid extraction regular expression") from exc
         return self
 
 
@@ -55,7 +58,10 @@ class Condition(ConfigModel):
         if self.operator == "one_of" and not isinstance(self.value, list):
             raise ValueError("one_of requires a list")
         if self.operator == "matches":
-            re.compile(self.value)
+            try:
+                re.compile(self.value)
+            except re.error as exc:
+                raise ValueError("Invalid condition regular expression") from exc
         return self
 
 

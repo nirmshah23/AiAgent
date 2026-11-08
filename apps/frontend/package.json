@@ -5,6 +5,7 @@
   "scripts": {
     "start": "ng serve --host 127.0.0.1 --proxy-config proxy.json",
     "build": "ng build",
+    "test:ui:focused:dialog": "playwright test --config playwright.dialog.config.ts",
     "test:ui:focused:voice-capture": "playwright test"
   },
   "dependencies": {

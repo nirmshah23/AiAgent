@@ -80,6 +80,7 @@ class AudioPipeline:
         if env_truthy("PIPECAT_SMART_TURN_LOG_DATA"):
             raise ValueError("Smart Turn audio logging is disabled for this application")
         self.notify = notify
+        self.record_transcript = None
         self.bridge = None
         self.reply_task = None
         self.dialog_finished = False
@@ -122,6 +123,8 @@ class AudioPipeline:
 
         @user.event_handler("on_user_turn_stopped")
         async def stopped(_user, _strategy, message):
+            if self.record_transcript and message.content:
+                await self.record_transcript("caller_turn", message.content)
             await notify({"type": "turn_ended"})
             if self.bridge and message.content and not self.dialog_finished:
                 await self._interrupt_reply()

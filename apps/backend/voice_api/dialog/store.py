@@ -1,6 +1,7 @@
 """Single-application-database dialog policy snapshots and operator CLI."""
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -30,17 +31,33 @@ def load_config(engine) -> DialogConfig:
         return DialogConfig.model_validate(record.configuration)
 
 
-def save_config(engine, config: DialogConfig):
+def revision(config: DialogConfig) -> str:
+    """Stable content revision shared by CLI and browser policy snapshots."""
+    return hashlib.sha256(
+        json.dumps(config.model_dump(mode="json"), sort_keys=True).encode()
+    ).hexdigest()
+
+
+class PolicyConflict(ValueError):
+    """The submitted snapshot is no longer current."""
+
+
+def save_config(engine, config: DialogConfig, expected_revision: str | None = None):
     """Replace the policy atomically; connected calls retain their own snapshot."""
     with sessionmaker(engine).begin() as db:
         record = db.scalar(select(DialogPolicy).where(DialogPolicy.id == 1).with_for_update())
         if record is None:
             raise ValueError("Dialog policy missing; apply Alembic migrations")
+        if (
+            expected_revision is not None
+            and revision(DialogConfig.model_validate(record.configuration)) != expected_revision
+        ):
+            raise PolicyConflict("Policy changed; reload before saving")
         record.configuration = config.model_dump(mode="json")
 
 
 def main():
-    """Export or import configuration without exposing an unauthenticated write API."""
+    """Export or import configuration from the operator command line."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["export", "import"])
     parser.add_argument("path", type=Path)

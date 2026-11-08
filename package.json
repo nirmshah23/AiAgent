@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build:ui": "npm --prefix apps/frontend run build",
+    "test:ui:focused:dialog": "npm --prefix apps/frontend run test:ui:focused:dialog",
     "test:ui:unit": "npm --prefix apps/frontend exec -- ng test --watch=false",
     "test:backend:focused:voice-capture": "powershell -NoProfile -File tests/scripts/backend/start_backend_focused_voice_capture.ps1",
     "test:backend:focused:dialog": "powershell -NoProfile -File tests/scripts/backend/start_backend_focused_dialog.ps1",

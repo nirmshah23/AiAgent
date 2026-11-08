@@ -2,7 +2,7 @@
 
 ## Scope and boundaries
 
-`apps/backend/voice_api/dialog` implements a text-in / response-plan-out engine. The live `audio_pipeline.py` connects complete caller turns to `DialogVoiceBridge`, then sends its configured response texts through Piper and browser playback. No typed chat or policy editing API is exposed.
+`apps/backend/voice_api/dialog` implements a text-in / response-plan-out engine. The live `audio_pipeline.py` connects complete caller turns to `DialogVoiceBridge`, then sends its configured response texts through Piper and browser playback. Caller interaction remains voice-only. The separate operator Intent settings screen edits the database policy through the HTTP API described below.
 
 `DialogVoiceBridge` receives the aggregator's complete `UserTurnStoppedMessage.content`, rather than each Vosk fragment. A private response task handles each caller turn without blocking audio ingestion. New speech cancels and awaits obsolete dialog/speech work; disconnect cancels that task before clearing dialog history and stopping Pipecat. A `complete`, `ended`, `failed` or `history_limit` reply finishes the workflow after speech drains. Cancellation during a business API call terminates the workflow because its outcome is unknown; no automatic replay or retry occurs.
 
@@ -42,7 +42,17 @@ Use the existing [database setup](voice-capture.md#local-windows-development). V
 .venv/Scripts/python.exe -m voice_api.dialog.store import dialog-policy.local.json
 ```
 
-On Linux use `.venv/bin/alembic` and `.venv/bin/python`. The local exported file is ignored by Git. Commands print the target URL with its password hidden. Imports validate before opening the database and replace the entire policy within one transaction; keep exported snapshots if rollback is needed. Alembic owns schema changes. No unauthenticated policy-write endpoint is exposed. Store service URLs and credentials in deployment-owned configuration, not in entity values or response templates.
+On Linux use `.venv/bin/alembic` and `.venv/bin/python`. The local exported file is ignored by Git. Commands print the target URL with its password hidden. Imports validate before opening the database and replace the entire policy within one transaction; keep exported snapshots if rollback is needed. Alembic owns schema changes. The browser operator API also replaces this policy atomically; see the browser workflow below. Store service URLs and credentials in deployment-owned configuration, not in entity values or response templates.
+
+## Browser configuration workflow
+
+Open **Intent settings** from the voice workspace while no call is active. Select an intent or **Add intent**. Structured controls cover every property of the authoritative configuration schema: name/type/description, entity labels and Regex normalization, alternative rules and conditions, API endpoint aliases/methods/query/optional-query/body/response mappings/timeouts, response templates, missing-information prompts and next-intent transitions. Nested sections expand independently; list items can be added, removed and moved up. **Shared settings** contains policy thresholds, scripts and history limits.
+
+Edits remain local until **Save configuration** validates and replaces the entire policy in the single application database. Delete asks for confirmation and removes the intent with its nested configuration; saving rejects unresolved transitions, invalid expressions, duplicate names and other schema violations. WELCOME and END are required General intents and cannot be deleted. Reload and leaving the editor ask before discarding edits. Active calls retain their snapshots; new calls read saved policy. Entity-threshold changes are rejected while inference is loaded: use the CLI import and restart the API for that model setting. Unknown endpoint aliases are also rejected while the runtime is loaded. Deployment URL/header configuration remains outside the UI; when dialog inference is disabled, alias availability is checked at the next enabled startup.
+
+`GET /api/v1/dialog-policy` returns `configuration`, its content `revision`, and `json_schema` generated directly from DialogConfig. `PUT` accepts `configuration` and the previously read `revision`, returning the saved snapshot. OpenAPI at `/openapi.json` publishes both contracts. Validation returns 422; an outdated revision returns 409 without writing. PostgreSQL row locking makes comparison and replacement atomic with other browser/CLI saves. No database schema migration is needed; this changes shared application policy data only, with no tenant databases.
+
+Authentication remains out of scope. This is an operator interface on the existing local/private application, not a public administration service. PUT requires an Origin listed in `ALLOWED_ORIGINS` (403 otherwise); this prevents cross-origin browser writes but is not authentication. Keep the existing loopback Compose port binding, or place the application behind deployment access controls before wider exposure. Neither endpoint exposes deployment-owned service URLs or credentials.
 
 ## Processing semantics
 
