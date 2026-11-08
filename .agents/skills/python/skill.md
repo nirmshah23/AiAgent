@@ -71,7 +71,7 @@ and transaction handling. Use any domain-specific skill when changing specialize
   whether to capture output in memory.
 - Do not expose sensitive payloads, credentials, or unrestricted subprocess
   output in user-facing errors or logs.
-- Preserve Windows development and Linux deployment compatibility.
+- Prefer native Windows 11 development and test execution for this experimental project. Do not add Linux deployment or container compatibility work unless explicitly requested.
 
 ## Files, Artifacts, and Caches
 

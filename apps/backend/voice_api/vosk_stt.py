@@ -1,23 +1,13 @@
-"""Local English streaming recognition of preprocessed transport PCM."""
+"""Local English Vosk provider, independent of transport and dialog."""
 
-import asyncio
 import json
 import os
-from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
 from vosk import KaldiRecognizer, Model
 
-from pipecat.frames.frames import DataFrame, InputAudioRawFrame, TranscriptionFrame
-from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
-from pipecat.transcriptions.language import Language
-from pipecat.utils.time import time_now_iso8601
-
-
-@dataclass
-class FlushRecognitionFrame(DataFrame):
-    """Finalize pending words at the push-to-talk boundary."""
+from .stt import run_inference
 
 
 @lru_cache(maxsize=1)
@@ -29,13 +19,11 @@ def english_model():
     return Model(str(path))
 
 
-class VoskSTT(FrameProcessor):
-    """Keep decoder state private to a session and decoding off the event loop."""
+class VoskRecognizer:
+    """Keep incremental decoder state private to a session."""
 
     def __init__(self):
-        """Construct on the pipeline's model-loading worker thread."""
-        super().__init__()
-        self.record_transcript = None
+        """Load shared weights and create a session decoder."""
         self.recognizer = KaldiRecognizer(english_model(), 16000)
 
     def _decode(self, audio):
@@ -43,28 +31,18 @@ class VoskSTT(FrameProcessor):
             return self.recognizer.FinalResult()
         if self.recognizer.AcceptWaveform(audio):
             return self.recognizer.Result()
-        return None
+        return "{}"
 
-    async def process_frame(self, frame, direction):
-        """Emit final text internally, then preserve audio and control ordering."""
-        await super().process_frame(frame, direction)
-        if direction == FrameDirection.DOWNSTREAM and isinstance(
-            frame, (InputAudioRawFrame, FlushRecognitionFrame)
-        ):
-            audio = frame.audio if isinstance(frame, InputAudioRawFrame) else None
-            result = await asyncio.to_thread(self._decode, audio)
-            if result:
-                text = json.loads(result).get("text", "").strip()
-                if text:
-                    if self.record_transcript:
-                        await self.record_transcript("recognition", text)
-                    await self.push_frame(
-                        TranscriptionFrame(
-                            text,
-                            "user",
-                            time_now_iso8601(),
-                            language=Language.EN,
-                            finalized=True,
-                        )
-                    )
-        await self.push_frame(frame, direction)
+    async def accept(self, audio: bytes) -> list[str]:
+        """Return an endpoint result if Vosk finalized one."""
+        result = await run_inference(self._decode, audio)
+        return [json.loads(result).get("text", "")]
+
+    async def flush(self) -> list[str]:
+        """Finalize pending words and retain the decoder for the next press."""
+        result = await run_inference(self._decode, None)
+        return [json.loads(result).get("text", "")]
+
+    async def close(self):
+        """Release session decoder state without emitting pending words."""
+        self.recognizer = None

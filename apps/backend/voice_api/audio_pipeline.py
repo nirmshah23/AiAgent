@@ -34,7 +34,7 @@ from pipecat.utils.env import env_truthy
 from pipecat.workers.runner import WorkerRunner
 
 from .dialog.voice_bridge import DialogVoiceBridge
-from .vosk_stt import FlushRecognitionFrame, VoskSTT
+from .stt import FlushRecognitionFrame, LocalSTT
 
 # These upstream modules include the complete speech text in debug messages.
 logger.disable("pipecat.services.tts_service")
@@ -85,7 +85,6 @@ class AudioPipeline:
         self.reply_task = None
         self.dialog_finished = False
         self.speech_lock = asyncio.Lock()
-        self.stt = VoskSTT()
         model = Path(os.getenv("PIPER_MODEL_PATH", "models/piper/en_US-lessac-medium.onnx"))
         if not model.is_file() or not Path(str(model) + ".json").is_file():
             raise ValueError(
@@ -100,6 +99,7 @@ class AudioPipeline:
             use_cuda=False,
             length_scale=float(os.getenv("PIPER_LENGTH_SCALE", "1.3")),
         )
+        self.stt = LocalSTT()
         self.analyzer = LocalSmartTurnAnalyzerV3(cpu_count=1)
         user = LLMUserAggregator(
             LLMContext(),

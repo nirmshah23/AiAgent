@@ -5,12 +5,17 @@ Read this file first, then the repository documentation index (if present) and o
 ## Project and development objective
 
 - Build a web-based, voice-only chatbot using Pipecat. Support English only; user authentication is out of scope for now.
-- Develop in VS Code on Windows with Docker Desktop; deploy Linux containers using Docker Compose on Linux. Keep development and deployment configuration aligned and document platform differences.
-- Target the user's Intel Core Ultra 5 processor and Intel Arc graphics. Confirm the exact CPU/GPU models, RAM, graphics memory, drivers, and device visibility before selecting models or claiming acceleration. Evaluate an NPU only if present and supported.
-- Prioritize effective hardware use and low conversational latency. Evaluate Intel-compatible inference such as OpenVINO, model quantization, and CPU/GPU placement against measured latency, quality, memory, and concurrent-session performance. Keep a working CPU fallback; do not assume CUDA or Intel GPU passthrough through Docker Desktop.
 - Preserve Pipecat's established streaming/asynchronous pipeline, interruption handling, cancellation, and resource cleanup. Voice-only interaction may include accessible session controls and status; do not add typed chat, video, other languages, or authentication without a scope change.
 - Treat the root [README.md](README.md) as the project overview and initial documentation entry point. Update it in the same change whenever objectives, architecture, setup, hardware support, configuration, deployment, or verification instructions change. Clearly separate planned capabilities from implemented and tested behavior; document only commands that exist.
 - Follow the repository's established synchronous or asynchronous execution model. Introduce async execution only when justified by workload requirements or explicitly requested.
+
+## Experimental development environment and hardware acceleration
+
+- The primary experimental environment is Windows 11 running natively on an Intel Core Ultra 5 system with Intel Arc integrated graphics (the available system has been identified as Core Ultra 5 125H). Prefer native Windows development and test workflows; do not add Docker Compose, Docker Desktop, container-based setup, or Linux deployment procedures unless explicitly requested.
+- When generative AI, LLM, embedding, reranking, speech, vision, or other ML models are used, first inspect the available CPU, Intel Arc GPU, and any supported NPU capabilities. Use this hardware for local inference and model workloads as much as the selected framework and model reliably support.
+- Prefer Intel-compatible acceleration paths (for example, OpenVINO or a framework's supported Intel GPU backend) when they are suitable. Do not assume NVIDIA hardware, CUDA, or CUDA-only dependencies. Use CPU execution as a deliberate fallback when an operation or model is not supported on the Intel accelerator.
+- Select model formats, quantization, batch sizes, context lengths, and concurrency with the system's actual shared-memory and performance limits in mind. Avoid assuming dedicated GPU VRAM. Do not download or load a model until its hardware/runtime compatibility and approximate memory requirements have been checked.
+- Benchmark representative workloads on this machine and report the execution device, runtime/backend, model precision or quantization, throughput/latency, and any fallback. Keep acceleration optional and isolate device-specific configuration so the application remains testable when an accelerator is unavailable.
 
 ## Database and tenancy
 
