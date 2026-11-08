@@ -2,6 +2,12 @@
   "name": "voice-workspace",
   "private": true,
   "scripts": {
+    "app:setup": "powershell -NoProfile -File scripts/native.ps1 setup",
+    "app:start": "powershell -NoProfile -File scripts/native.ps1 start",
+    "app:stop": "powershell -NoProfile -File scripts/native.ps1 stop",
+    "app:restart": "powershell -NoProfile -File scripts/native.ps1 restart",
+    "app:check": "powershell -NoProfile -File scripts/native.ps1 check",
+    "test:backend:focused:native-setup": "powershell -NoProfile -File tests/scripts/backend/start_backend_focused_native_setup.ps1",
     "build:ui": "npm --prefix apps/frontend run build",
     "test:ui:focused:dialog": "npm --prefix apps/frontend run test:ui:focused:dialog",
     "test:ui:unit": "npm --prefix apps/frontend exec -- ng test --watch=false",

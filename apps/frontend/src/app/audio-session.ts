@@ -42,7 +42,7 @@ export class AudioSession {
     socket.binaryType = 'arraybuffer';
     this.connectionTimeout = setTimeout(() => {
       if (!this.connected()) this.fail('Connection timed out. Check the voice service and try again.');
-    }, 10000);
+    }, 60000); // The first native CPU session may still be loading recognition models.
     socket.onmessage = event => {
       if (this.socket !== socket) return;
       if (event.data instanceof ArrayBuffer) {

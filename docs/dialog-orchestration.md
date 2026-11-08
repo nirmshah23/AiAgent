@@ -1,3 +1,5 @@
+Native setup, environment configuration and lifecycle commands are documented in [Windows operation](native-windows.md). Historical container checks below do not establish native acceptance.
+
 # Dialog orchestration
 
 ## Scope and boundaries

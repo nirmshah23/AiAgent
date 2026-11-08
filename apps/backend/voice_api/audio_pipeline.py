@@ -98,6 +98,9 @@ class AudioPipeline:
             download_dir=model.parent,
             use_cuda=False,
             length_scale=float(os.getenv("PIPER_LENGTH_SCALE", "1.3")),
+            # Native CPU cold synthesis can exceed the generic 3-second idle limit.
+            # Piper closes its completed context explicitly; this is a safety timeout.
+            stop_frame_timeout_s=30.0,
         )
         self.stt = LocalSTT()
         self.analyzer = LocalSmartTurnAnalyzerV3(cpu_count=1)

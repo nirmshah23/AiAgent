@@ -1,4 +1,8 @@
+Native Windows is the current application workflow; see [setup and lifecycle](../docs/native-windows.md). Container results below are historical evidence from the removed deployment workflow.
+
 # Test discovery and execution
+
+Native lifecycle checks are discovered under `tests/backend/focused/native_setup/test_*.py`. Run `npm run test:backend:focused:native-setup`; these checks cover literal environment loading, repository-relative paths, dedicated database targeting, credential redaction, missing models, occupied ports, authenticated graceful shutdown, and safe repeated stop. They do not connect to the deployment database.
 
 Dialog engine checks are discovered under `tests/backend/focused/dialog/test_*.py`. Run `npm run test:backend:focused:dialog` from the root; its launcher is `tests/scripts/backend/start_backend_focused_dialog.ps1`. On Linux use `apps/backend/.venv/bin/python -m pytest -c tests/backend/pytest.ini --confcutdir=tests/backend tests/backend/focused/dialog`. Install the base backend requirements and pytest/httpx/ruff first. These checks use fake model adapters, mocked HTTP and isolated SQLite, including policy persistence and migration upgrade/downgrade. They do not verify real model inference, PostgreSQL, voice playback or latency. Optional model packages install from `apps/backend/requirements-dialog.txt`; see [dialog setup](../docs/dialog-orchestration.md).
 
@@ -34,9 +38,9 @@ Root package scripts provide `build:ui`, `test:backend:focused:voice-capture`, a
 
 Angular unit tests are colocated as `src/app/*.spec.ts`, run by Angular's Vitest builder using `tsconfig.spec.json`. From the root, use `npm run test:ui:unit`.
 
-For integration acceptance, start Compose, verify the health check, hold/release Space in the browser, end the session, and check that `voice_sessions` contains its final byte count and timestamps. Also verify browser microphone permission denial and disconnect/reconnect. Run these against the dedicated local database, never a shared database. Full browser-to-live-server spoken-response and inference latency acceptance remain separate; English recognition and dialog-to-Piper wiring are implemented.
+For integration acceptance, run `scripts/native.ps1 start`, verify the health check, hold/release Space in the browser, end the session, and check that `voice_sessions` contains its final byte count and timestamps. Also verify browser microphone permission denial and disconnect/reconnect. Run these against the dedicated local database, never a shared database. Full browser-to-live-server spoken-response and inference latency acceptance remain separate; English recognition and dialog-to-Piper wiring are implemented.
 
-The backend container can be checked independently of PostgreSQL with `docker build -f apps/backend/Dockerfile -t voice-audio-check .`. Browser tests use a simulated server; they do not measure physical echo cancellation, noise reduction, normalization quality, or conversational endpoint accuracy.
+Use `scripts/native.ps1 check` and `start` to verify native runtime and PostgreSQL integration separately from isolated checks.
 
 Audio integration verification: 12 backend focused tests, 4 Angular unit tests, 4 Playwright capture checks, the frontend production build, Ruff checks, and the backend Docker image build passed. The Linux container also passed a CPU pipeline startup/PCM ingestion/cleanup smoke check. This does not establish full Compose/PostgreSQL integration or acoustic/performance acceptance.
 
@@ -55,3 +59,26 @@ Intent configuration checks: `npm run test:backend:focused:dialog` includes poli
 Intent editor verification on Windows: 43 dialog backend checks, 12 capture backend checks, seven Angular unit checks, two policy browser checks and four existing capture browser checks passed. Production UI build and backend Ruff lint/format checks passed. Desktop (1440px) and narrow (390px, including expanded nested controls) screenshots were inspected. Policy browser checks use real HTTP and isolated SQLite; deployment PostgreSQL concurrency, enabled-model alias/threshold enforcement and container acceptance were not exercised by this browser suite.
 
 Latest-session debug capture verification: 12 voice focused checks and 43 dialog focused checks passed. The eight WebSocket protocol checks also passed with SESSION_DEBUG_ENABLED=true and an isolated temporary artifact directory. Separate filesystem smoke checks verified WAV readability during capture, transcript output, replacement, and stale-session isolation. Backend Ruff lint/format checks passed. Container acceptance and capture latency remain unmeasured; no new persistent tests were authored in this implementation phase.
+
+Native Windows workflow verification: setup completed with Python 3.12 and CPU PyTorch, including npm ci. The 43 dialog checks, 12 capture checks, 13 native lifecycle checks, nine Angular unit checks, six Playwright checks, production frontend build and backend Ruff lint/format checks passed. Native startup from another working directory, repeated start, graceful stop and restart passed. A dedicated fresh `voice_native` database and application role were created on the existing PostgreSQL 18 server; migrations reached `0004` and seeded policy. A real native WebSocket smoke check received welcome and generated response PCM and persisted a completed session with 161,998 received audio bytes. Chromium verified the native page, Angular API proxy and stored intent editor. A disposable PostgreSQL cluster was used for initial migration/startup verification and stopped afterward; existing Docker volumes were untouched. Physical acoustic quality, domain recognition accuracy, hardware latency/concurrency and Intel acceleration remain unverified.
+
+Native cold Piper synthesis initially exceeded the generic three-second audio-context idle limit. The application now uses a 30-second safety timeout while retaining Pipecat's explicit context completion and interruption/cancellation ownership. Real CPU welcome and generated-response delivery passed after this adjustment.
+
+Real native Chromium smoke verification passed again after a full API restart (cold model load), covering voice capture with recorded microphone input, welcome/generated PCM, press interruption, session end and reconnect. This is browser/runtime integration evidence, not physical microphone or acoustic acceptance. Angular connection setup now allows up to 60 seconds for cold native recognition model loading; unit tests verify delayed readiness and eventual timeout.
+
+## Parakeet OpenVINO verification
+
+On 9 November 2026, native Windows 11 checks used Core Ultra 5 125H, Intel Arc integrated graphics (driver 32.0.101.5763), approximately 15.5 GiB system RAM, Python 3.12.15, ONNX Runtime 1.31.1 and `onnxruntime-ep-openvino==1.8.1`. The existing pinned Parakeet TDT 0.6B v3 FP32 ONNX export was used without quantization, with four CPU intra-op threads and serialized batch-one inference. The plugin detected CPU, Arc GPU and Intel AI Boost NPU; NPU recognition was not attempted.
+
+The [benchmark commands](../docs/voice-capture.md#optional-intel-openvino-execution) ran the bundled 5.062-second speech WAV once cold and three times warm per backend, in separate processes:
+
+| Backend | Model load | First inference | Warm inference median | Warm real-time factor |
+| --- | --- | --- | --- | --- |
+| ONNX CPU FP32 | 5.65 s | 1.46 s | 0.456 s | 0.090 |
+| OpenVINO Arc GPU FP32 hint, profiling enabled | 12.19 s | 1.43 s | 0.347 s | 0.068 |
+
+All transcript fingerprints matched exactly across both backends and all runs. The GPU encoder/decoder execution profiles recorded 156 OpenVINO graph-node executions and no CPU graph-node executions; both sessions reported OpenVINO followed by CPU fallback. Preprocessing/resampling and the remaining voice components still use CPU. No whole-model CPU fallback occurred in the GPU benchmark. Profile artifacts remain private under ignored `.local-run/parakeet-profiles/`.
+
+These are small, sequential smoke measurements on a busy machine, not a general speedup guarantee. GPU warm runs ranged from 0.316 to 1.137 seconds. An earlier first GPU initialization took 43.79 seconds plus 14.62 seconds for first inference; compilation state and system load materially affect cold timings. Different input lengths may introduce new compilation costs. Memory peaks, hardware utilization, long utterances, concurrent calls, FP16 quality, NPU execution and browser-to-audible-response latency were not measured.
+
+The existing full backend focused suite passed 68 checks with the CPU default. The 12 voice-capture checks also passed with `PARAKEET_BACKEND=openvino`, `PARAKEET_OPENVINO_DEVICE=GPU`, `PARAKEET_OPENVINO_PRECISION=FP32` and `DIALOG_ENABLED=false`, covering real audio ingestion, turn handling and cleanup. Backend and changed-script Ruff lint/format checks passed. Separate in-process smoke checks verified initialization fallback, inference-error retry and shared CPU retention, propagation of CPU errors, recovery after a failed CPU allocation, and invalid configuration rejection. These temporary smoke checks do not replace persistent regression tests; no tests were authored in this implementation phase. See the configuration guide for optional installation and provider diagnostics.

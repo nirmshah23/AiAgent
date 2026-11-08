@@ -92,3 +92,4 @@ evals/llm-with-backend/test-runs/
 
 # Private latest-session testing audio and transcripts
 session-debug/
+.local-run/
