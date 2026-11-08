@@ -97,6 +97,7 @@ class AudioPipeline:
             settings=PiperTTSService.Settings(voice=model.stem),
             download_dir=model.parent,
             use_cuda=False,
+            length_scale=float(os.getenv("PIPER_LENGTH_SCALE", "1.3")),
         )
         self.analyzer = LocalSmartTurnAnalyzerV3(cpu_count=1)
         user = LLMUserAggregator(

@@ -5,19 +5,14 @@
       "type": "General",
       "description": "Greeting or start of a call",
       "responses": [
-        "Welcome. I can help you check a claim status. Are you calling as a member or a provider?"
+        "Welcome. I can help you check a claim status. Please provide your claim number. If you do not have it, provide your member ID, date of birth and date of service."
       ]
     },
     {
       "name": "CLAIM_STATUS",
       "type": "Business",
-      "description": "Claim Status: check insurance claim status, payment, denial or pending information for a member or provider.",
+      "description": "Claim Status: check insurance claim status, payment, denial or pending information using a claim number or member details.",
       "fields": [
-        {
-          "name": "callerType",
-          "label": "caller type MEMBER or PROVIDER",
-          "normalize": "upper"
-        },
         {
           "name": "claimNumber",
           "label": "claim number",
@@ -37,63 +32,19 @@
           "name": "dateOfService",
           "label": "date of service YYYY-MM-DD",
           "normalize": "strip"
-        },
-        {
-          "name": "providerNpi",
-          "label": "provider NPI",
-          "normalize": "digits"
-        },
-        {
-          "name": "taxId",
-          "label": "provider tax identifier",
-          "normalize": "strip"
-        },
-        {
-          "name": "authCode",
-          "label": "IVR validation token",
-          "normalize": "strip"
-        },
-        {
-          "name": "searchType",
-          "label": "search type SPECIFIC_CLAIM or RECENT_CLAIMS",
-          "normalize": "upper"
-        },
-        {
-          "name": "maxResults",
-          "label": "maximum results",
-          "normalize": "digits"
         }
       ],
       "rules": [
         {
           "conditions": [
             {
-              "field": "callerType",
-              "operator": "equals",
-              "value": "MEMBER"
-            },
-            {
               "field": "claimNumber",
               "operator": "present"
-            },
-            {
-              "field": "memberId",
-              "operator": "present"
-            },
-            {
-              "field": "dateOfBirth",
-              "operator": "matches",
-              "value": "\\d{4}-\\d{2}-\\d{2}"
             }
           ]
         },
         {
           "conditions": [
-            {
-              "field": "callerType",
-              "operator": "equals",
-              "value": "MEMBER"
-            },
             {
               "field": "memberId",
               "operator": "present"
@@ -109,53 +60,24 @@
               "value": "\\d{4}-\\d{2}-\\d{2}"
             }
           ]
-        },
-        {
-          "conditions": [
-            {
-              "field": "callerType",
-              "operator": "equals",
-              "value": "PROVIDER"
-            },
-            {
-              "field": "providerNpi",
-              "operator": "matches",
-              "value": "\\d{10}"
-            },
-            {
-              "field": "taxId",
-              "operator": "present"
-            },
-            {
-              "field": "claimNumber",
-              "operator": "present"
-            }
-          ]
         }
       ],
       "api": {
         "endpoint": "claim_status",
         "method": "GET",
-        "query": {
-          "callerType": "callerType"
-        },
+        "query": {},
         "optional_query": {
           "claimNumber": "claimNumber",
           "memberId": "memberId",
           "dateOfBirth": "dateOfBirth",
-          "dateOfService": "dateOfService",
-          "providerNpi": "providerNpi",
-          "taxId": "taxId",
-          "authCode": "authCode",
-          "searchType": "searchType",
-          "maxResults": "maxResults"
+          "dateOfService": "dateOfService"
         },
         "response": {
           "status": "claims.0.claimStatusSpeechText",
           "claim_number": "claims.0.claimNumber"
         }
       },
-      "missing_template": "To check your claim status, please provide or correct: {missing_fields}. Use MEMBER or PROVIDER for callerType, ten digits for providerNpi, and YYYY-MM-DD for dates.",
+      "missing_template": "Please provide your claim number, or your member ID, date of birth and date of service. Use YYYY-MM-DD for dates.",
       "responses": [
         "This is a simulated claim lookup. Claim {claim_number}. {status}"
       ],

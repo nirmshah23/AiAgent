@@ -7,6 +7,7 @@
 """Piper TTS service implementation."""
 
 import asyncio
+import math
 import os
 from collections.abc import AsyncGenerator, AsyncIterator
 from dataclasses import dataclass
@@ -28,6 +29,7 @@ from pipecat.utils.types import require_given
 
 try:
     from piper import PiperVoice
+    from piper.config import SynthesisConfig
     from piper.download_voices import download_voice
 except ModuleNotFoundError as e:
     logger.error(f"Exception: {e}")
@@ -70,6 +72,7 @@ class PiperTTSService(TTSService):
         download_dir: Path | None = None,
         force_redownload: bool = False,
         use_cuda: bool = False,
+        length_scale: float | None = None,
         settings: Settings | None = None,
         **kwargs,
     ):
@@ -86,10 +89,16 @@ class PiperTTSService(TTSService):
                 Pipecat's cache directory.
             force_redownload: Re-download the voice model even if it already exists.
             use_cuda: Use CUDA for GPU-accelerated inference.
+            length_scale: Positive duration multiplier; larger values speak more slowly.
+                None uses the voice model default.
             settings: Runtime-updatable settings. When provided alongside deprecated
                 parameters, ``settings`` values take precedence.
             **kwargs: Additional arguments passed to the parent `TTSService`.
         """
+        if length_scale is not None and (not math.isfinite(length_scale) or length_scale <= 0):
+            raise ValueError("Piper length_scale must be a finite positive number")
+        self._synthesis_config = SynthesisConfig(length_scale=length_scale)
+
         # 1. Initialize default_settings with hardcoded defaults
         default_settings = self.Settings(model=None, voice=None, language=None)
 
@@ -178,7 +187,7 @@ class PiperTTSService(TTSService):
             await self.start_tts_usage_metrics(text)
 
             async for frame in self._stream_audio_frames_from_iterator(
-                async_iterator(self._voice.synthesize(text)),
+                async_iterator(self._voice.synthesize(text, syn_config=self._synthesis_config)),
                 in_sample_rate=self._voice.config.sample_rate,
                 context_id=context_id,
             ):

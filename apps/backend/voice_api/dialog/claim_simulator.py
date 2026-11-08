@@ -30,19 +30,6 @@ def simulated_claim_api() -> BusinessAPI:
             for name in ("dateOfBirth", "dateOfService"):
                 if name in values:
                     date.fromisoformat(values[name])
-            if "providerNpi" in values and (
-                len(values["providerNpi"]) != 10
-                or not values["providerNpi"].isascii()
-                or not values["providerNpi"].isdigit()
-            ):
-                raise ValueError("Invalid NPI")
-            if values.get("searchType", "SPECIFIC_CLAIM") not in {
-                "SPECIFIC_CLAIM",
-                "RECENT_CLAIMS",
-            }:
-                raise ValueError("Invalid search type")
-            if int(values.get("maxResults", "3")) < 1:
-                raise ValueError("Invalid result limit")
         except ValueError:
             return httpx.Response(400, json={"detail": "Invalid simulated lookup criteria"})
         claim = {

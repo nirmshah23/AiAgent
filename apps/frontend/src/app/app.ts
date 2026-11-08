@@ -11,9 +11,11 @@ import { AudioSession } from './audio-session';
   template: `
     <mat-toolbar><span class="brand">◉ Voice</span><span class="toolbar-note">Audio workspace</span></mat-toolbar>
     <main>
+      <header class="introduction">
       <p class="eyebrow">PUSH TO TALK · ENGLISH</p>
-      <h1>Your voice.<br>On your terms.</h1>
+      <h1>Your voice.<br> On your terms.</h1>
       <p class="intro">Hold the spacebar to share audio. Release it to switch your microphone off.</p>
+      </header>
       <mat-card appearance="outlined" class="capture-panel">
         <div class="status" aria-live="polite"><span class="dot" [class.active]="audio.recording()"></span>
           {{ audio.recording() ? 'Microphone live' : audio.connected() ? 'Connected · microphone off' : audio.connecting() ? 'Connecting…' : 'No active session' }}
@@ -33,11 +35,11 @@ import { AudioSession } from './audio-session';
         </div>
         @if (audio.error()) { <p class="error" role="alert">{{ audio.error() }}</p> }
       </mat-card>
-      <section class="details" aria-label="How it works">
+      <details class="instructions"><summary>How it works</summary><section class="details" aria-label="How it works">
         <div><span class="step">01</span><h3>Connect</h3><p>Start a session, then hold Space to allow microphone access.</p></div>
         <div><span class="step">02</span><h3>Hold to speak</h3><p>Keep Space pressed as you speak. Release to stop capturing.</p></div>
         <div><span class="step">03</span><h3>Stay in control</h3><p>Leaving this window stops capture. End the session when finished.</p></div>
-      </section>
+      </section></details>
       <footer>Voice conversation · English speech responses.<br>Session metadata is saved. Audio is streamed and discarded.</footer>
     </main>`,
 })
@@ -46,11 +48,11 @@ export class AppComponent implements OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   keydown(event: KeyboardEvent): void {
-    if (event.code !== 'Space' || event.altKey || event.ctrlKey || event.metaKey || event.repeat) return;
+    if (event.code !== 'Space' || event.altKey || event.ctrlKey || event.metaKey) return;
     const target = event.target;
     if (target instanceof HTMLElement && target.closest('button, input, textarea, select, a, [contenteditable="true"]')) return;
     event.preventDefault();
-    void this.audio.press();
+    if (!event.repeat) void this.audio.press();
   }
 
   @HostListener('window:keyup', ['$event'])
