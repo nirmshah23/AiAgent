@@ -27,6 +27,13 @@ class BusinessAPI:
         """Bind extracted entities and map JSON response paths to template placeholders."""
         url = self.endpoints[contract.endpoint]
         query = {key: entities[name] for key, name in contract.query.items()}
+        query.update(
+            {
+                key: entities[name]
+                for key, name in contract.optional_query.items()
+                if entities.get(name)
+            }
+        )
         body = {key: entities[name] for key, name in contract.body.items()}
         async with httpx.AsyncClient(
             follow_redirects=False, trust_env=False, transport=self.transport

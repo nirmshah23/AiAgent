@@ -4,7 +4,7 @@
   "scripts": {
     "build:ui": "npm --prefix apps/frontend run build",
     "test:ui:unit": "npm --prefix apps/frontend exec -- ng test --watch=false",
-    "test:backend:focused:voice-capture": ".\\apps\\backend\\.venv\\Scripts\\python.exe -m pytest -c tests/backend/pytest.ini --confcutdir=tests/backend tests/backend/focused/voice_capture",
+    "test:backend:focused:voice-capture": "powershell -NoProfile -File tests/scripts/backend/start_backend_focused_voice_capture.ps1",
     "test:backend:focused:dialog": "powershell -NoProfile -File tests/scripts/backend/start_backend_focused_dialog.ps1",
     "test:ui:focused:voice-capture": "npm --prefix apps/frontend run test:ui:focused:voice-capture"
   }

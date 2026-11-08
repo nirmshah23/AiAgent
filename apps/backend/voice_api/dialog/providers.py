@@ -1,4 +1,4 @@
-"""CPU inference adapters: Laya classifies; Regex and INT8 GLiNER extract."""
+"""CPU inference adapters: Laya classifies; Regex and optional INT8 GLiNER extract."""
 
 import asyncio
 import re
@@ -12,7 +12,14 @@ from .config import Intent
 class LocalModels:
     """Own one serialized inference worker shared by sessions, with bounded admission."""
 
-    def __init__(self, laya_path: str, gliner_path: str, entity_threshold: float = 0.5):
+    def __init__(
+        self,
+        laya_path: str,
+        gliner_path: str,
+        entity_threshold: float = 0.5,
+        *,
+        quantize: bool = True,
+    ):
         """Load prepared local models on CPU; never download weights during a call."""
         from pathlib import Path
 
@@ -23,7 +30,10 @@ class LocalModels:
             raise ValueError("Laya and GLiNER paths must be prepared local model directories")
         self.laya = Agent(laya_path, device="cpu")
         self.gliner = GLiNER.from_pretrained(
-            gliner_path, map_location="cpu", local_files_only=True, quantize="int8"
+            gliner_path,
+            map_location="cpu",
+            local_files_only=True,
+            quantize="int8" if quantize else None,
         )
         self.gliner.eval()
         self.entity_threshold = entity_threshold

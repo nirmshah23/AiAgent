@@ -17,29 +17,58 @@ export class AudioSession {
   private held = false;
   private generation = 0;
   private turn = 0;
+  private playback?: AudioContext;
+  private playbackEnd = 0;
+  private playing = new Set<AudioBufferSourceNode>();
+  private finishing = false;
+  private playbackSuppressed = false;
 
   connect(): void {
     if (this.connecting() || this.connected()) return;
+    this.finishing = false;
+    this.playbackSuppressed = false;
+    try {
+      this.playback = new AudioContext({ sampleRate: 16000 });
+      void this.playback.resume().catch(() => this.fail('Audio playback unavailable. Start a new session to retry.'));
+    } catch {
+      this.error.set('Audio playback unavailable in this browser.');
+      return;
+    }
     this.error.set('');
     this.bytes.set(0);
     this.connecting.set(true);
     const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/v1/audio`);
     this.socket = socket;
+    socket.binaryType = 'arraybuffer';
     this.connectionTimeout = setTimeout(() => {
       if (!this.connected()) this.fail('Connection timed out. Check the voice service and try again.');
     }, 10000);
     socket.onmessage = event => {
       if (this.socket !== socket) return;
+      if (event.data instanceof ArrayBuffer) {
+        if (!this.playbackSuppressed) this.playAudio(event.data);
+        return;
+      }
       const message: { type: string; audio_bytes?: number } = JSON.parse(event.data);
       if (message.type === 'ready') {
         clearTimeout(this.connectionTimeout);
         this.connecting.set(false);
         this.connected.set(true);
+        socket.send('welcome');
         this.heartbeat = setInterval(() => {
           if (socket.readyState === WebSocket.OPEN) socket.send('ping');
         }, 20000);
       }
       if (message.type === 'paused') this.bytes.set(message.audio_bytes ?? 0);
+      if (message.type === 'listening') this.playbackSuppressed = false;
+      if (message.type === 'speech_started') this.stopPlayback();
+      if (message.type === 'dialog_ended') {
+        this.finishing = true;
+        if (!this.playing.size) this.disconnect();
+      }
+      if (message.type === 'speech_error') {
+        this.fail('Speech output failed. Start a new session to try again.');
+      }
     };
     socket.onerror = () => {
       if (this.socket === socket) this.fail('Unable to connect. Check that the voice service is running, then try again.');
@@ -52,6 +81,8 @@ export class AudioSession {
   async press(): Promise<void> {
     if (!this.connected() || this.held) return;
     this.held = true;
+    this.playbackSuppressed = true;
+    this.stopPlayback();
     const generation = this.generation;
     const turn = ++this.turn;
     this.error.set('');
@@ -110,6 +141,7 @@ export class AudioSession {
     this.held = false;
     ++this.turn;
     const wasRecording = this.recording();
+    if (!wasRecording) this.playbackSuppressed = false;
     this.recording.set(false);
     this.processor?.disconnect();
     if (this.processor) this.processor.port.onmessage = null;
@@ -127,6 +159,10 @@ export class AudioSession {
   disconnect(): void {
     ++this.generation;
     this.release();
+    this.stopPlayback();
+    const playback = this.playback;
+    this.playback = undefined;
+    if (playback && playback.state !== 'closed') void playback.close().catch(() => {});
     clearInterval(this.heartbeat);
     clearTimeout(this.connectionTimeout);
     const socket = this.socket;
@@ -140,5 +176,41 @@ export class AudioSession {
   private fail(message: string): void {
     this.disconnect();
     this.error.set(message);
+  }
+
+  private playAudio(data: ArrayBuffer): void {
+    const context = this.playback;
+    if (!context || !data.byteLength || data.byteLength % 2) return;
+    if (context.state !== 'running') {
+      this.fail('Audio playback was suspended. Start a new session to retry.');
+      return;
+    }
+    const start = Math.max(context.currentTime, this.playbackEnd);
+    const duration = data.byteLength / 32000;
+    if (start + duration - context.currentTime > 15) {
+      this.fail('Speech playback cannot keep up. Start a new session to retry.');
+      return;
+    }
+    const buffer = context.createBuffer(1, data.byteLength / 2, 16000);
+    const samples = buffer.getChannelData(0);
+    const pcm = new DataView(data);
+    for (let i = 0; i < samples.length; ++i) samples[i] = pcm.getInt16(i * 2, true) / 32768;
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.connect(context.destination);
+    this.playing.add(source);
+    source.onended = () => {
+      source.disconnect();
+      this.playing.delete(source);
+      if (this.finishing && !this.playing.size) this.disconnect();
+    };
+    source.start(start);
+    this.playbackEnd = start + duration;
+  }
+
+  private stopPlayback(): void {
+    for (const source of this.playing) { source.stop(); source.disconnect(); }
+    this.playing.clear();
+    this.playbackEnd = 0;
   }
 }

@@ -17,11 +17,23 @@ from .database import make_engine, save_session
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Own the application's database engine lifecycle."""
+    """Own database and shared inference until voice sessions have stopped."""
+    dialog_enabled = os.getenv("DIALOG_ENABLED", "true").strip().lower()
+    if dialog_enabled not in {"true", "false"}:
+        raise ValueError("DIALOG_ENABLED must be true or false")
+    app.state.max_sessions = max(1, int(os.getenv("MAX_VOICE_SESSIONS", "2")))
     app.state.engine = make_engine()
+    app.state.dialog = None
+    app.state.active_sessions = 0
     try:
+        if dialog_enabled == "true":
+            from .dialog.voice_bridge import DialogRuntime
+
+            app.state.dialog = await run_in_threadpool(DialogRuntime, app.state.engine)
         yield
     finally:
+        if app.state.dialog:
+            await run_in_threadpool(app.state.dialog.close)
         app.state.engine.dispose()
 
 
@@ -50,19 +62,31 @@ async def audio(websocket: WebSocket):
         await websocket.close(code=1008)
         return
     await websocket.accept()
+    if app.state.active_sessions >= app.state.max_sessions:
+        await websocket.close(code=1013, reason="Voice service busy")
+        return
+    app.state.active_sessions += 1
     session_id, started = uuid4(), datetime.now(UTC)
     total, active, status = 0, False, "disconnected"
     pipeline = None
     send_lock = asyncio.Lock()
+    welcomed = False
 
     async def notify(message):
         async with send_lock:
-            await websocket.send_json(message)
+            async with asyncio.timeout(5):
+                if isinstance(message, bytes):
+                    await websocket.send_bytes(message)
+                else:
+                    await websocket.send_json(message)
 
     try:
         from .audio_pipeline import AudioPipeline
 
         pipeline = await run_in_threadpool(AudioPipeline, notify)
+        if app.state.dialog:
+            dialog = await run_in_threadpool(app.state.dialog.session)
+            pipeline.attach_dialog(dialog)
         await pipeline.start()
         await notify({"type": "ready", "session_id": str(session_id)})
         async with asyncio.timeout(1800):
@@ -82,7 +106,11 @@ async def audio(websocket: WebSocket):
                     await pipeline.feed(data)
                 else:
                     command = message.get("text")
-                    if command == "start" and not active:
+                    if command == "welcome" and not welcomed and not active:
+                        welcomed = True
+                        await pipeline.welcome()
+                    elif command == "start" and not active:
+                        welcomed = True
                         await pipeline.resume()
                         active = True
                         await notify({"type": "listening"})
@@ -107,11 +135,14 @@ async def audio(websocket: WebSocket):
                 if pipeline is not None:
                     await pipeline.close()
             finally:
-                await run_in_threadpool(
-                    save_session,
-                    app.state.engine,
-                    session_id,
-                    started,
-                    total,
-                    status,
-                )
+                try:
+                    await run_in_threadpool(
+                        save_session,
+                        app.state.engine,
+                        session_id,
+                        started,
+                        total,
+                        status,
+                    )
+                finally:
+                    app.state.active_sessions -= 1

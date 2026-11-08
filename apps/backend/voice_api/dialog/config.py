@@ -71,6 +71,7 @@ class APIContract(ConfigModel):
     endpoint: str = Field(pattern=r"^[A-Za-z_][A-Za-z_0-9]*$")
     method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"] = "GET"
     query: dict[str, str] = Field(default_factory=dict)
+    optional_query: dict[str, str] = Field(default_factory=dict)
     body: dict[str, str] = Field(default_factory=dict)
     response: dict[str, str] = Field(default_factory=dict)
     timeout_seconds: float = Field(default=10, gt=0, le=60)
@@ -102,6 +103,7 @@ class Intent(ConfigModel):
         if self.api:
             references.update(self.api.query.values())
             references.update(self.api.body.values())
+            references.update(self.api.optional_query.values())
         if not references <= names:
             raise ValueError("Rules/API reference unknown entity fields")
         response_names = set(self.api.response) if self.api else set()

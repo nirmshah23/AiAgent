@@ -2,3 +2,5 @@
 -r requirements.txt
 laya==0.4.29
 gliner==0.2.30
+# Keep SentencePiece's generated protobuf compatible with Pipecat's protobuf<7.
+sentencepiece==0.2.1

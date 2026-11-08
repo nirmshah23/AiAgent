@@ -38,7 +38,7 @@ import { AudioSession } from './audio-session';
         <div><span class="step">02</span><h3>Hold to speak</h3><p>Keep Space pressed as you speak. Release to stop capturing.</p></div>
         <div><span class="step">03</span><h3>Stay in control</h3><p>Leaving this window stops capture. End the session when finished.</p></div>
       </section>
-      <footer>Audio transport preview · No spoken replies yet.<br>Session metadata is saved. Audio is streamed and discarded.</footer>
+      <footer>Voice conversation · English speech responses.<br>Session metadata is saved. Audio is streamed and discarded.</footer>
     </main>`,
 })
 export class AppComponent implements OnDestroy {
