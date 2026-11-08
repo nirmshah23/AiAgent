@@ -1,0 +1,4 @@
+# Optional inference runtime. Prepare local weights before constructing LocalModels.
+-r requirements.txt
+laya==0.4.29
+gliner==0.2.30

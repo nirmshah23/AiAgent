@@ -1,0 +1,47 @@
+{
+  "confidence_threshold": 0.8,
+  "entity_threshold": 0.5,
+  "intents": [
+    {
+      "name": "WELCOME",
+      "type": "General",
+      "description": "Greeting or start of a call",
+      "responses": ["Welcome. How can I help you?"]
+    },
+    {
+      "name": "END",
+      "type": "General",
+      "description": "End the conversation or say goodbye",
+      "responses": ["Goodbye."]
+    },
+    {
+      "name": "ORDER_STATUS",
+      "type": "Business",
+      "description": "The caller asks for the delivery or shipping status of an existing order",
+      "fields": [
+        {
+          "name": "order_id",
+          "label": "order identifier",
+          "regex": "(?i)order(?: number| id)?[ :#]+([A-Z0-9-]+)",
+          "normalize": "upper"
+        }
+      ],
+      "rules": [
+        {"conditions": [{"field": "order_id", "operator": "present"}]}
+      ],
+      "api": {
+        "endpoint": "orders",
+        "method": "GET",
+        "query": {"order_id": "order_id"},
+        "response": {"order_status": "order.status"},
+        "timeout_seconds": 10
+      },
+      "responses": [
+        "Your order is {order_status}.",
+        "The current order status is {order_status}."
+      ],
+      "missing_template": "To check your order, please provide {missing_fields}.",
+      "next_intent": "END"
+    }
+  ]
+}

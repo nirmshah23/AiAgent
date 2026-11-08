@@ -4,21 +4,23 @@ An English-only, web-based voice chatbot project built on [Pipecat](https://gith
 
 ## Current status
 
+A separate [dialog engine and configuration layer](docs/dialog-orchestration.md) now supports configurable General/Business intents, alternative sufficient-field rules, business API bindings, missing-field prompts, response templates and next-intent transitions. Optional CPU adapters use the `laya` package for intent classification and Regex plus INT8 GLiNER-small for intent-specific extraction. PostgreSQL policy storage and an operator import/export command are implemented; the default General intents are WELCOME and END, with no business intents seeded. The engine is not connected to the live voice pipeline yet. Real model inference, quality and latency remain unverified; speech synthesis/playback remain planned.
+
 The repository contains the imported Pipecat framework plus an Angular 21 / Angular Material push-to-talk client in `apps/frontend` and a FastAPI WebSocket API in `apps/backend`. The browser uses Web Audio and an AudioWorklet to stream mono 16 kHz PCM16 only while Space is held; key release and focus loss stop microphone tracks. PostgreSQL stores session metadata through SQLAlchemy, with Alembic managing the single application database. Audio passes through a Pipecat pipeline with local English Vosk recognition, Silero VAD and local Smart Turn v3 endpointing and is not stored. Browser capture requests AEC, noise suppression, and automatic gain control before 16 kHz PCM16 encoding.
 
-Dockerfiles and [Compose configuration](compose.yaml) package the frontend, API, migration job, and PostgreSQL. See [application setup and transport contract](docs/voice-capture.md) for working startup commands. The backend image builds on Docker Desktop?s Linux engine, and CPU pipeline startup, PCM ingestion, and cleanup were smoke-tested inside it. Full PostgreSQL/Compose workflow verification remains separate. Local English Vosk speech recognition is integrated after browser preprocessing. Response generation, spoken replies, and hardware benchmarks remain unimplemented. CPU audio analysis is integrated; physical acoustic quality and speech endpoint accuracy remain to be measured.
+Dockerfiles and [Compose configuration](compose.yaml) package the frontend, API, migration job, and PostgreSQL. See [application setup and transport contract](docs/voice-capture.md) for working startup commands. The backend image builds on Docker Desktop?s Linux engine, and CPU pipeline startup, PCM ingestion, and cleanup were smoke-tested inside it. Full PostgreSQL/Compose workflow verification remains separate. Local English Vosk speech recognition is integrated after browser preprocessing. Live dialog integration, spoken replies, and hardware benchmarks remain unimplemented. CPU audio analysis is integrated; physical acoustic quality and speech endpoint accuracy remain to be measured.
 
-The intended workflow is Windows development in VS Code with Docker Desktop, followed by deployment of Linux containers using Docker Compose on a Linux host. The target hardware is an Intel Core Ultra 5 processor with Intel Arc graphics. Exact hardware variants and available memory remain to be confirmed.
+The intended workflow is Windows development in VS Code with Docker Desktop, followed by deployment of Linux containers using Docker Compose on a Linux host. Native inspection identified an Intel Core Ultra 5 125H, about 16 GB RAM and Intel Arc Graphics. Exact GPU variant, usable graphics memory and Linux/container device visibility remain unverified; see the [hardware observations](docs/dialog-orchestration.md#local-inference-adapters).
 
 ## Planned voice workflow
 
 1. The user starts a browser session and grants microphone access.
 2. A streaming audio transport connects the browser to a Pipecat session.
 3. Voice activity detection and turn handling feed English speech recognition.
-4. A language model generates a response, and speech synthesis streams English audio back to the browser.
+4. The separate dialog engine uses Laya to classify intents, Regex and INT8 GLiNER-small to extract fields, and database-configured rules/APIs/templates to choose replies; speech synthesis streams English audio back to the browser.
 5. Interruption handling stops obsolete speech when the user speaks again; stopping or disconnecting releases session resources.
 
-The initial transport is a bounded WebSocket PCM stream; its [contract](docs/voice-capture.md#api-and-websocket-contract) is implemented with Pipecat audio analysis; English recognition uses Vosk; spoken response stages remain planned. Future integration must reuse Pipecat's asynchronous streaming model. Prefer local inference where practical for this hardware; any external service dependency must be explicit and configurable.
+The initial transport is a bounded WebSocket PCM stream; its [contract](docs/voice-capture.md#api-and-websocket-contract) is implemented with Pipecat audio analysis; English recognition uses Vosk. Dialog logic is implemented separately, while its live voice integration and spoken response stages remain planned. Future integration must reuse Pipecat's asynchronous streaming model. Prefer local inference where practical for this hardware; any external service dependency must be explicit and configurable.
 
 ## Development and deployment
 

@@ -4,3 +4,5 @@ SQLAlchemy==2.0.44
 psycopg[binary]==3.2.12
 alembic==1.17.2
 vosk==0.3.45
+httpx==0.28.1
+regex==2026.4.4

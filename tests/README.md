@@ -1,5 +1,11 @@
 # Test discovery and execution
 
+Dialog engine checks are discovered under `tests/backend/focused/dialog/test_*.py`. Run `npm run test:backend:focused:dialog` from the root; its launcher is `tests/scripts/backend/start_backend_focused_dialog.ps1`. On Linux use `apps/backend/.venv/bin/python -m pytest -c tests/backend/pytest.ini --confcutdir=tests/backend tests/backend/focused/dialog`. Install the base backend requirements and pytest/httpx/ruff first. These checks use fake model adapters, mocked HTTP and isolated SQLite, including policy persistence and migration upgrade/downgrade. They do not verify real model inference, PostgreSQL, voice playback or latency. Optional model packages install from `apps/backend/requirements-dialog.txt`; see [dialog setup](../docs/dialog-orchestration.md).
+
+Dialog increment verification: 34 focused dialog tests, the 12 existing voice-capture tests, Ruff lint/format checks and example-policy validation passed on Windows/Python 3.12. Optional model package installation and concrete runtime-interface inspection also passed. Model weights/inference, INT8 quality, performance, live PostgreSQL migration and Linux container integration remain unverified. No browser behavior changed.
+
+For both application backend modules, run `apps/backend/.venv/Scripts/python.exe -m pytest -c tests/backend/pytest.ini --confcutdir=tests/backend tests/backend/focused` on Windows (substitute `.venv/bin/python` on Linux). Lint/format checks apply to `apps/backend` and `tests/backend/focused`.
+
 Application checks are separate from the imported Pipecat tests. Install backend development tools into the isolated application environment:
 
 ```powershell

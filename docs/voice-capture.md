@@ -4,6 +4,8 @@
 
 `apps/frontend` is a standalone Angular 21.2.25 application with Angular Material 21.2.14. `apps/backend` is a FastAPI application. One PostgreSQL database, `voice`, owns all application data; there is no tenancy or authentication. These applications do not modify the imported Pipecat library.
 
+The separate [dialog engine](dialog-orchestration.md) now has database-backed configuration and optional Laya/Regex/INT8 GLiNER adapters. It is not yet connected to this capture pipeline and does not change the WebSocket protocol. Migration `0002` adds shared dialog policy alongside session metadata; capture stores no caller transcripts.
+
 The browser connects before requesting microphone access. Holding Space requests mono microphone audio, creates a 16 kHz Web Audio `AudioContext`, and uses an AudioWorklet to encode signed 16-bit little-endian PCM. Releasing Space stops tracks, disconnects nodes, closes the context, and prevents queued worklet messages from being transmitted. Key repeat is ignored. Blur, hidden documents, page exit, microphone removal, and session termination also stop capture. Permission prompts may outlast a press; audio from a late permission result is stopped without transmission. Space on interactive controls retains normal keyboard behavior; move focus outside a button to talk.
 
 The backend validates frames and runs a per-connection Pipecat pipeline using Silero VAD and `LocalSmartTurnAnalyzerV3` on CPU. Vosk performs local English speech recognition on CPU before the user aggregator. An LLM, synthesis, and playback remain unimplemented. No audio or transcripts are persisted. Only the session UUID, start/end timestamps, completion status, and received byte count are stored after each connection ends. Process crashes can lose this final metadata; active sessions are not durable. No historical session browsing API is provided.
@@ -34,7 +36,7 @@ Set-Location apps/backend
 .venv/Scripts/uvicorn voice_api.main:app --host 127.0.0.1 --port 8000 --ws-max-size 16384
 ```
 
-Provision that dedicated database and role before migrating. Check the effective `DATABASE_URL`; Alembic prints the target with the password hidden. Migration `0001` creates only `voice_sessions` in the single application database. Alembic owns schema changes; application startup never creates tables. Downgrading removes session metadata and is destructive.
+Provision that dedicated database and role before migrating. Check the effective `DATABASE_URL`; Alembic prints the target with the password hidden. Migration `0001` creates `voice_sessions`; `0002` creates and seeds `dialog_policy` in the same application database. Alembic owns schema changes; application startup never creates tables. Downgrading `0002` deletes configured dialog policy; downgrading `0001` deletes session metadata.
 
 In another terminal:
 

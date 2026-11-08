@@ -2,6 +2,7 @@
 
 from alembic import context
 from voice_api.database import Base, make_engine
+from voice_api.dialog.store import DialogPolicy  # noqa: F401 -- register Alembic metadata
 
 if context.is_offline_mode():
     raise RuntimeError("Online migration required to verify the target database")
