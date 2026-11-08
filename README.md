@@ -1,317 +1,241 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg">
-    <img src="assets/logo-light.svg" alt="Gradbot" width="300" />
-  </picture>
+<h1><div align="center">
+ <img alt="pipecat" width="300px" height="auto" src="https://raw.githubusercontent.com/pipecat-ai/pipecat/main/pipecat.png">
+</div></h1>
+
+[![PyPI](https://img.shields.io/pypi/v/pipecat-ai)](https://pypi.org/project/pipecat-ai) ![Tests](https://github.com/pipecat-ai/pipecat/actions/workflows/tests.yaml/badge.svg) [![codecov](https://codecov.io/gh/pipecat-ai/pipecat/graph/badge.svg?token=LNVUIVO4Y9)](https://codecov.io/gh/pipecat-ai/pipecat) [![Docs](https://img.shields.io/badge/Documentation-blue)](https://docs.pipecat.ai) [![Discord](https://img.shields.io/discord/1239284677165056021)](https://discord.gg/pipecat) [![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-blue)](https://deepwiki.com/pipecat-ai/pipecat)
+
+# 🎙️ Pipecat: Real-Time Voice & Multimodal AI Agents
+
+**Pipecat** is an open-source Python framework for building real-time voice and multimodal conversational agents. Build a single voice agent or a full multi-agent system where specialists hand off, fan out in parallel, and coordinate over a shared bus, locally or distributed across processes and machines. Orchestrate audio and video, AI services, transports, and conversation pipelines effortlessly, so you can focus on what makes your agents unique.
+
+> Want to dive right in? Run `pipecat init quickstart` or follow the [quickstart guide](https://docs.pipecat.ai/getting-started/quickstart).
+
+## 🚀 What you can build
+
+- **Voice Assistants** – natural, streaming conversations with AI
+- **Multi-Agent Systems** – specialists that hand off, fan out in parallel, or run as sidecars over a shared bus
+- **AI Companions** – coaches, meeting assistants, characters
+- **Multimodal Interfaces** – voice, video, images, and more
+- **Interactive Storytelling** – creative tools with generative media
+- **Business Agents** – customer intake, support bots, guided flows
+- **Complex Dialog Systems** – design logic with structured conversations
+
+## 🧠 Why Pipecat?
+
+- **Voice-first**: Integrates speech recognition, text-to-speech, and conversation handling
+- **Pluggable**: Supports many AI services and tools
+- **Composable Pipelines**: Build complex behavior from modular components
+- **Multi-Agent Ready**: Each pipeline is an agent. Compose them with handoff, parallel fan-out, sidecar workers, or distributed deployments
+- **Real-Time**: Ultra-low latency interaction with different transports (e.g. WebSockets or WebRTC)
+
+## 🌐 Pipecat ecosystem
+
+### 📱 Client SDKs
+
+Building client applications? You can connect to Pipecat from any platform using our official SDKs:
+
+<a href="https://docs.pipecat.ai/client/js/introduction">JavaScript</a> | <a href="https://docs.pipecat.ai/client/react/introduction">React</a> | <a href="https://docs.pipecat.ai/client/react-native/introduction">React Native</a> |
+<a href="https://docs.pipecat.ai/client/ios/introduction">Swift</a> | <a href="https://docs.pipecat.ai/client/android/introduction">Kotlin</a> | <a href="https://docs.pipecat.ai/client/c++/introduction">C++</a> | <a href="https://github.com/pipecat-ai/pipecat-esp32">ESP32</a>
+
+### 🧭 Structured conversations
+
+Need predefined or dynamic conversation paths with state management? [Pipecat Flows](https://docs.pipecat.ai/guides/features/pipecat-flows) is built into Pipecat. Browse the [examples](https://github.com/pipecat-ai/pipecat/tree/main/examples/flows) to see it in action.
+
+### 🪄 Beautiful UIs
+
+Want to build beautiful and engaging experiences? Check out [Pipecat UI](https://github.com/pipecat-ai/pipecat-ui), a shadcn registry of components for building voice AI applications. Browse the [documentation](https://ui.pipecat.ai/) for component previews and installation guides.
+
+### 🛠️ Create and deploy projects
+
+The [Pipecat CLI](https://docs.pipecat.ai/api-reference/cli/overview) ships with `pipecat-ai` — install it with `uv tool install "pipecat-ai[cli]"`. Run `pipecat init` to start a project: it sets you up so an AI coding assistant (Claude Code, Codex) builds it for you, and can scaffold a runnable bot in under a minute. Then use the CLI to monitor and deploy your agent to production.
+
+### 🔍 Debugging
+
+Looking for help debugging your pipeline and processors? Check out [Whisker](https://github.com/pipecat-ai/whisker), a real-time Pipecat debugger.
+
+### 🖥️ Terminal
+
+Love terminal applications? Check out [Tail](https://github.com/pipecat-ai/tail), a terminal dashboard for Pipecat.
+
+### 🤖 Claude Code skills
+
+Use [Pipecat Skills](https://github.com/pipecat-ai/skills) with [Claude Code](https://claude.ai/code) to scaffold projects, deploy to Pipecat Cloud, and more. Install the marketplace with:
+
+```
+claude plugin marketplace add pipecat-ai/skills
+```
+
+and install any of the available plugins.
+
+### 🧩 Community integrations
+
+Build and share your own Pipecat service integrations! Browse existing [community integrations](https://docs.pipecat.ai/api-reference/server/services/supported-services) or check out our [guide](COMMUNITY_INTEGRATIONS.md) to create your own.
+
+### 📺️ Pipecat TV channel
+
+Catch new features, interviews, and how-tos on our [Pipecat TV](https://www.youtube.com/playlist?list=PLzU2zoMTQIHjqC3v4q2XVSR3hGSzwKFwH) channel.
+
+## 🎬 See it in action
+
+<p float="left">
+    <a href="https://github.com/pipecat-ai/pipecat-examples/tree/main/simple-chatbot"><img src="https://raw.githubusercontent.com/pipecat-ai/pipecat-examples/main/simple-chatbot/image.png" width="400" /></a>&nbsp;
+    <a href="https://github.com/pipecat-ai/pipecat-examples/tree/main/storytelling-chatbot"><img src="https://raw.githubusercontent.com/pipecat-ai/pipecat-examples/main/storytelling-chatbot/image.png" width="400" /></a>
+    <br/>
+    <a href="https://github.com/pipecat-ai/pipecat-examples/tree/main/daily-multi-translation"><img src="https://raw.githubusercontent.com/pipecat-ai/pipecat-examples/main/daily-multi-translation/image.png" width="400" /></a>&nbsp;
+    <a href="https://github.com/pipecat-ai/pipecat/blob/main/examples/vision/vision-moondream.py"><img src="https://github.com/pipecat-ai/pipecat/blob/main/examples/assets/moondream.png" width="400" /></a>
 </p>
 
-<p align="center">
-  <strong>Open-source voice agent framework.<br>~50 lines of code. Any OpenAI-compatible LLM.</strong>
-</p>
+## 🧩 Available services
 
-<p align="center">
-  <a href="https://pypi.org/project/gradbot/"><img src="https://img.shields.io/pypi/v/gradbot.svg" alt="PyPI"></a>
-  <a href="https://pypi.org/project/gradbot/"><img src="https://img.shields.io/pypi/pyversions/gradbot.svg" alt="Python"></a>
-  <a href="https://github.com/gradium-ai/gradbot/blob/main/LICENSE-MIT"><img src="https://img.shields.io/badge/license-MIT%2FApache--2.0-blue" alt="License"></a>
-</p>
+| Category            | Services                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Speech-to-Text      | [AssemblyAI](https://docs.pipecat.ai/api-reference/server/services/stt/assemblyai), [AWS](https://docs.pipecat.ai/api-reference/server/services/stt/aws), [Azure](https://docs.pipecat.ai/api-reference/server/services/stt/azure), [Cartesia](https://docs.pipecat.ai/api-reference/server/services/stt/cartesia), [Deepgram](https://docs.pipecat.ai/api-reference/server/services/stt/deepgram), [ElevenLabs](https://docs.pipecat.ai/api-reference/server/services/stt/elevenlabs), [Fal Wizper](https://docs.pipecat.ai/api-reference/server/services/stt/fal), [FunASR](https://docs.pipecat.ai/api-reference/server/services/stt/funasr), [Gladia](https://docs.pipecat.ai/api-reference/server/services/stt/gladia), [Google](https://docs.pipecat.ai/api-reference/server/services/stt/google), [Gradium](https://docs.pipecat.ai/api-reference/server/services/stt/gradium), [Groq (Whisper)](https://docs.pipecat.ai/api-reference/server/services/stt/groq), [Meta](https://docs.pipecat.ai/api-reference/server/services/stt/meta), [Mistral](https://docs.pipecat.ai/api-reference/server/services/stt/mistral), [Moonshine](https://docs.pipecat.ai/api-reference/server/services/stt/moonshine), [NVIDIA](https://docs.pipecat.ai/api-reference/server/services/stt/nvidia), [OpenAI (Whisper)](https://docs.pipecat.ai/api-reference/server/services/stt/openai), [Rime](https://docs.pipecat.ai/api-reference/server/services/stt/rime), [Sarvam](https://docs.pipecat.ai/api-reference/server/services/stt/sarvam), [Soniox](https://docs.pipecat.ai/api-reference/server/services/stt/soniox), [Speechmatics](https://docs.pipecat.ai/api-reference/server/services/stt/speechmatics), [Together](https://docs.pipecat.ai/api-reference/server/services/stt/together), [Whisper](https://docs.pipecat.ai/api-reference/server/services/stt/whisper), [xAI](https://docs.pipecat.ai/api-reference/server/services/stt/xai), [Zoom](https://docs.pipecat.ai/api-reference/server/services/stt/zoom-ai)                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| LLMs                | [Anthropic](https://docs.pipecat.ai/api-reference/server/services/llm/anthropic), [AWS](https://docs.pipecat.ai/api-reference/server/services/llm/aws), [Azure](https://docs.pipecat.ai/api-reference/server/services/llm/azure), [Baseten](https://docs.pipecat.ai/api-reference/server/services/llm/baseten), [Cerebras](https://docs.pipecat.ai/api-reference/server/services/llm/cerebras), [Crusoe](https://docs.pipecat.ai/api-reference/server/services/llm/crusoe), [DeepSeek](https://docs.pipecat.ai/api-reference/server/services/llm/deepseek), [Fireworks AI](https://docs.pipecat.ai/api-reference/server/services/llm/fireworks), [Gemini](https://docs.pipecat.ai/api-reference/server/services/llm/google), [Grok](https://docs.pipecat.ai/api-reference/server/services/llm/grok), [Groq](https://docs.pipecat.ai/api-reference/server/services/llm/groq), [Inception](https://docs.pipecat.ai/api-reference/server/services/llm/inception), [Mistral](https://docs.pipecat.ai/api-reference/server/services/llm/mistral), [Nebius](https://docs.pipecat.ai/api-reference/server/services/llm/nebius), [Novita](https://docs.pipecat.ai/api-reference/server/services/llm/novita), [NVIDIA NIM](https://docs.pipecat.ai/api-reference/server/services/llm/nvidia), [Ollama](https://docs.pipecat.ai/api-reference/server/services/llm/ollama), [OpenAI](https://docs.pipecat.ai/api-reference/server/services/llm/openai), [OpenAI Responses](https://docs.pipecat.ai/api-reference/server/services/llm/openai-responses), [OpenRouter](https://docs.pipecat.ai/api-reference/server/services/llm/openrouter), [Perplexity](https://docs.pipecat.ai/api-reference/server/services/llm/perplexity), [Qwen](https://docs.pipecat.ai/api-reference/server/services/llm/qwen), [SambaNova](https://docs.pipecat.ai/api-reference/server/services/llm/sambanova), [Sarvam](https://docs.pipecat.ai/api-reference/server/services/llm/sarvam), [Smallest](https://docs.pipecat.ai/api-reference/server/services/llm/smallest), [Together AI](https://docs.pipecat.ai/api-reference/server/services/llm/together)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Text-to-Speech      | [AssemblyAI](https://docs.pipecat.ai/api-reference/server/services/tts/assemblyai), [Async](https://docs.pipecat.ai/api-reference/server/services/tts/asyncai), [AWS](https://docs.pipecat.ai/api-reference/server/services/tts/aws), [Azure](https://docs.pipecat.ai/api-reference/server/services/tts/azure), [Bland](https://docs.pipecat.ai/api-reference/server/services/tts/bland), [Camb AI](https://docs.pipecat.ai/api-reference/server/services/tts/camb), [Cartesia](https://docs.pipecat.ai/api-reference/server/services/tts/cartesia), [Deepgram](https://docs.pipecat.ai/api-reference/server/services/tts/deepgram), [ElevenLabs](https://docs.pipecat.ai/api-reference/server/services/tts/elevenlabs), [Fish](https://docs.pipecat.ai/api-reference/server/services/tts/fish), [Google](https://docs.pipecat.ai/api-reference/server/services/tts/google), [Gradium](https://docs.pipecat.ai/api-reference/server/services/tts/gradium), [Groq](https://docs.pipecat.ai/api-reference/server/services/tts/groq), [Inworld](https://docs.pipecat.ai/api-reference/server/services/tts/inworld), [Kokoro](https://docs.pipecat.ai/api-reference/server/services/tts/kokoro), [MiniMax](https://docs.pipecat.ai/api-reference/server/services/tts/minimax), [Mistral](https://docs.pipecat.ai/api-reference/server/services/tts/mistral), [Neuphonic](https://docs.pipecat.ai/api-reference/server/services/tts/neuphonic), [NVIDIA](https://docs.pipecat.ai/api-reference/server/services/tts/nvidia), [OpenAI](https://docs.pipecat.ai/api-reference/server/services/tts/openai), [Piper](https://docs.pipecat.ai/api-reference/server/services/tts/piper), [Resemble](https://docs.pipecat.ai/api-reference/server/services/tts/resembleai), [Rime](https://docs.pipecat.ai/api-reference/server/services/tts/rime), [Sarvam](https://docs.pipecat.ai/api-reference/server/services/tts/sarvam), [Smallest](https://docs.pipecat.ai/api-reference/server/services/tts/smallest), [Soniox](https://docs.pipecat.ai/api-reference/server/services/tts/soniox), [Speechify](https://docs.pipecat.ai/api-reference/server/services/tts/speechify), [Speechmatics](https://docs.pipecat.ai/api-reference/server/services/tts/speechmatics), [Together](https://docs.pipecat.ai/api-reference/server/services/tts/together), [xAI](https://docs.pipecat.ai/api-reference/server/services/tts/xai), [XTTS](https://docs.pipecat.ai/api-reference/server/services/tts/xtts) |
+| Speech-to-Speech    | [AWS Nova Sonic](https://docs.pipecat.ai/api-reference/server/services/s2s/aws), [Azure Voice Live](https://docs.pipecat.ai/api-reference/server/services/s2s/azure-voice-live), [Gemini Multimodal Live](https://docs.pipecat.ai/api-reference/server/services/s2s/gemini-live), [Grok Voice Agent](https://docs.pipecat.ai/api-reference/server/services/s2s/grok), [OpenAI Realtime](https://docs.pipecat.ai/api-reference/server/services/s2s/openai), [Ultravox](https://docs.pipecat.ai/api-reference/server/services/s2s/ultravox), [Zoom AI Voice Agent](https://docs.pipecat.ai/api-reference/server/services/s2s/zoom-ai)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Transport           | [Daily (WebRTC)](https://docs.pipecat.ai/api-reference/server/services/transport/daily), [FastAPI Websocket](https://docs.pipecat.ai/api-reference/server/services/transport/fastapi-websocket), [LiveKit (WebRTC)](https://docs.pipecat.ai/api-reference/server/services/transport/livekit), [SmallWebRTCTransport](https://docs.pipecat.ai/api-reference/server/services/transport/small-webrtc), [Vonage (WebRTC)](https://docs.pipecat.ai/api-reference/server/services/transport/vonage), [WebSocket Server](https://docs.pipecat.ai/api-reference/server/services/transport/websocket-server), [WhatsApp](https://docs.pipecat.ai/api-reference/server/services/transport/whatsapp), Local                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Serializers         | [Exotel](https://docs.pipecat.ai/api-reference/server/services/serializers/exotel), [Genesys](https://docs.pipecat.ai/api-reference/server/services/serializers/genesys), [Plivo](https://docs.pipecat.ai/api-reference/server/services/serializers/plivo), [Twilio](https://docs.pipecat.ai/api-reference/server/services/serializers/twilio), [Telnyx](https://docs.pipecat.ai/api-reference/server/services/serializers/telnyx), [Vonage](https://docs.pipecat.ai/api-reference/server/services/serializers/vonage)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Video               | [HeyGen](https://docs.pipecat.ai/api-reference/server/services/video/heygen), [LemonSlice](https://docs.pipecat.ai/api-reference/server/services/transport/lemonslice), [Tavus](https://docs.pipecat.ai/api-reference/server/services/video/tavus), [Simli](https://docs.pipecat.ai/api-reference/server/services/video/simli)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Memory              | [mem0](https://docs.pipecat.ai/api-reference/server/services/memory/mem0)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Vision & Image      | [fal](https://docs.pipecat.ai/api-reference/server/services/image-generation/fal), [Google](https://docs.pipecat.ai/api-reference/server/services/image-generation/google), [Moondream](https://docs.pipecat.ai/api-reference/server/services/vision/moondream)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Audio Processing    | [Silero VAD](https://docs.pipecat.ai/api-reference/server/utilities/audio/silero-vad-analyzer), [Krisp Viva](https://docs.pipecat.ai/guides/features/krisp-viva), [Koala](https://docs.pipecat.ai/api-reference/server/utilities/audio/koala-filter), [ai-coustics](https://docs.pipecat.ai/api-reference/server/utilities/audio/aic-filter), [RNNoise](https://docs.pipecat.ai/api-reference/server/utilities/audio/rnnoise-filter)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Analytics & Metrics | [OpenTelemetry](https://docs.pipecat.ai/api-reference/server/utilities/opentelemetry), [Sentry](https://docs.pipecat.ai/api-reference/server/services/analytics/sentry)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Community           | [Browse community integrations →](https://docs.pipecat.ai/api-reference/server/services/supported-services)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
----
+📚 [View full services documentation →](https://docs.pipecat.ai/api-reference/server/services/supported-services)
 
-Gradbot gives you the event loop for voice agents. You write the logic, it handles the rest.
+## ⚡ Getting started
 
-At its core is a multiplexing engine written in Rust that coordinates three streams in real time: **speech-to-text**, **LLM inference**, and **text-to-speech** while managing conversational state, turn-taking, and interruptions. It works with any **OpenAI-compatible LLM** (GPT-4o, Claude, Groq, Ollama, LM Studio, etc.) and uses **[Gradium](https://gradium.ai)** for streaming STT/TTS across multiple voices from the Gradium voice catalog and 5 languages.
-
-Whether you're building a [haggling game](demos/fantasy_shop/) or a [travel booking assistant](demos/hotel/), Gradbot lets you go from idea to working voice experience in under 50 lines of code.
-
-[![Food Ordering Voice Agent Demo](https://img.youtube.com/vi/YKkBCFnLsj8/maxresdefault.jpg)](https://youtu.be/YKkBCFnLsj8)
-
-[![NPC 3D Game Demo](https://img.youtube.com/vi/WTFU4NZ9b2k/maxresdefault.jpg)](https://youtu.be/WTFU4NZ9b2k)
-
-## Features
-
-- **STT, LLM, and TTS coordinated in one loop**: Rust multiplexer streams all three concurrently
-- **Turn-taking, fillers, and barge-in handled automatically**: graceful audio fade-out on interruption
-- **Bi-directional audio streaming**: with VAD and silence detection out of the box
-- **Async tool calling**: the AI keeps talking naturally while slow tools execute in the background; lost calls are tracked and recovered
-- **Live transcription and tool calls in the same cycle**: define tools as JSON Schema, handle results sync or async
-- **Full Gradium voice library, 5 languages**: English, French, German, Spanish, Portuguese; unlimited voices via cloning
-- **Mid-session reconfiguration**: change voice, language, prompt, or tools without restarting
-- **MCP integration**: connect any MCP server for instant tool access
-- **Remote mode**: deploy `gradbot_server` centrally; clients connect over WebSocket with the same API
-- **Config pinning**: lock down LLM credentials server-side while clients control voice and prompt
-
-## Quick Start
-
-Install from PyPI:
+Run Pipecat on your local machine, then move your agent processes to the cloud when you're ready. Either way, you'll need [uv](https://docs.astral.sh/uv/getting-started/installation/) — install it first:
 
 ```bash
-pip install gradbot
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Or run a demo directly (builds from source):
+### Start a new project with the CLI
+
+The quickest path: install the Pipecat CLI and scaffold a new phone or web/mobile bot interactively.
 
 ```bash
-cd demos/simple_chat
-uv sync
+uv tool install "pipecat-ai[cli]"
+pipecat init
 ```
 
-Set your API keys:
+Follow the [quickstart guide](https://docs.pipecat.ai/getting-started/quickstart) to get your very first bot running, or dive a little deeper into [bootstrapping a project](https://docs.pipecat.ai/pipecat/get-started/build-your-next-bot).
+
+### Manual installation
+
+Prefer to wire things up yourself?
+
+1. Install the module
+
+   ```bash
+   # For new projects
+   uv init my-pipecat-app
+   cd my-pipecat-app
+   uv add pipecat-ai
+
+   # Or for existing projects
+   uv add pipecat-ai
+   ```
+
+2. Set up your environment
+
+   ```bash
+   cp env.example .env
+   ```
+
+3. To keep things lightweight, only the core framework is included by default. If you need support for third-party AI services, you can add the necessary dependencies with:
+
+   ```bash
+   uv add "pipecat-ai[option,...]"
+   ```
+
+> **Using pip?** You can still use `pip install pipecat-ai` and `pip install "pipecat-ai[option,...]"` to get set up.
+
+From here, the code examples below are the best way to learn — agents you can run, read, and adapt.
+
+## 🧪 Code examples
+
+- [Focused examples](https://github.com/pipecat-ai/pipecat/tree/main/examples) — small agents that each illustrate one or two specific services or concepts
+- [Example apps](https://github.com/pipecat-ai/pipecat-examples) — complete applications you can use as starting points for development
+
+## 🛠️ Developing Pipecat
+
+### Prerequisites
+
+**Minimum Python Version:** 3.11
+**Recommended Python Version:** >= 3.12
+
+### Setup steps
+
+1. Clone the repository and navigate to it:
+
+   ```bash
+   git clone https://github.com/pipecat-ai/pipecat.git
+   cd pipecat
+   ```
+
+2. Install development and testing dependencies:
+
+   ```bash
+   uv sync --group dev --all-extras \
+     --no-extra gstreamer \
+     --no-extra local \
+   ```
+
+3. Install the git pre-commit hooks:
+
+   ```bash
+   uv run pre-commit install
+   ```
+
+> **Note**: Some extras (local, gstreamer) require system dependencies. See documentation if you encounter build errors.
+
+### Claude Code skills
+
+Install development workflow skills for contributing to Pipecat with [Claude Code](https://claude.ai/code):
+
+```
+claude plugin marketplace add pipecat-ai/pipecat
+claude plugin install pipecat-dev@pipecat-dev-skills
+```
+
+### Running tests
+
+To run all tests, from the root directory:
 
 ```bash
-export GRADIUM_API_KEY=your_gradium_key
-
-# Any OpenAI-compatible endpoint (OpenAI, Groq, Ollama, LM Studio, etc.)
-export LLM_API_KEY=your_llm_key
-export LLM_BASE_URL=...  # optional, defaults to OpenAI
+uv run pytest
 ```
 
-Run:
+Tests run in parallel, one worker per CPU core. Pass `-n 0` to run them in a single process.
+
+Run a specific test suite:
 
 ```bash
-uv run uvicorn main:app --reload
-# Open http://localhost:8000
+uv run pytest tests/test_name.py
 ```
 
-## Architecture
+## 🤝 Contributing
 
-The multiplexer runs a state machine (**Listening** → **Flushing** → **Processing**) that handles concurrent audio streams, interruption detection, and turn management. Gradbot flushes trailing audio by pushing silence into the STT buffer so the LLM gets your complete utterance before replying. There is no extra latency from voice activity detection delays. If the user goes quiet, the LLM is prompted to re-engage naturally instead of creating dead air.
+We welcome contributions from the community! Whether you're fixing bugs, improving documentation, or adding new features, here's how you can help:
 
-## Who Should Use Gradbot
+- **Found a bug?** Open an [issue](https://github.com/pipecat-ai/pipecat/issues)
+- **Have a feature idea?** Start a [discussion](https://discord.gg/pipecat)
+- **Want to contribute code?** Check our [CONTRIBUTING.md](CONTRIBUTING.md) guide
+- **Documentation improvements?** [Docs](https://github.com/pipecat-ai/docs) PRs are always welcome
 
-Gradbot is built for **prototyping and experimentation**. Use it to hack on ideas and build voice experiences without spending hours on infrastructure.
+Before submitting a pull request, please check existing issues and PRs to avoid duplicates.
 
-- Support agents and real-time assistants
-- Coaching and educational apps
-- Tool-using voice workflows
-- Games and experimental interfaces
+We aim to review all contributions promptly and provide constructive feedback to help get your changes merged.
 
-Build weird, fun stuff. Voice agents don't have to be boring.
+## 🛟 Getting help
 
-> **For production**, use Gradium's models through orchestrators like [LiveKit](https://docs.livekit.io/agents/models/tts/gradium/) and [Pipecat](https://reference-server.pipecat.ai/en/latest/api/pipecat.services.gradium.html) for enterprise-grade reliability and scaling.
+➡️ [Join our Discord](https://discord.gg/pipecat)
 
-## Demos
+➡️ [Read the docs](https://docs.pipecat.ai)
 
-Every demo is a standalone FastAPI + WebSocket app. Pick one, `uv sync`, and run it.
+➡️ [Reach us on X](https://x.com/pipecat_ai)
 
-| Demo | What it does | Key concepts |
-|------|-------------|-------------|
-| **[simple_chat](demos/simple_chat/)** | Basic voice conversation | Minimal starting point, dynamic voice/prompt switching |
-| **[fantasy_shop](demos/fantasy_shop/)** | Haggling game: buy a sword from NPCs | Tool calling, multi-character, game state, deferred tools |
-| **[hotel](demos/hotel/)** | Hotel booking agent for Paris, Bali, Dubai | Deferred tool results with natural chit-chat using Web Search API |
-| **[paris_rental_agent](demos/paris_rental_agent/)** ([hosted demo](https://gradium.ai/gradbot/paris_rental_agent/)) | Paris apartment search assistant that builds a renter profile and finds listings | Voice/text profile intake, Tavily web search, scoring, saved listings |
-| **[business_bank](demos/business_bank/)** | Banking agent with PIN auth and loan applications | Security flows, multi-step business logic |
-| **[restaurant_ordering](demos/restaurant_ordering/)** | Multilingual voice ordering agent for a fast-food restaurant | Menu browsing, order customization, multilingual support |
-| **[npc_3d_game](demos/npc_3d_game/)** | 3D office exploration: solve voice riddles, handle NPC check-ins | Three.js, multi-session (clue + check-in), response classification |
-
-## Building a New Demo
-
-Copy an existing demo and modify it yourself, or ask your AI coding assistants:
-
-```bash
-cp -r demos/simple_chat demos/my_demo
-cd demos/my_demo
-uv sync
-```
-
-Every demo has three files:
-
-| File | What to edit | What it controls |
-|------|-------------|-----------------|
-| `main.py` | System prompt, tool definitions, tool handlers | The AI's personality and capabilities |
-| `static/index.html` | UI layout, colors, game state display | What the user sees |
-| `config.yaml` | TTS/STT/session settings | Voice tuning (optional) |
-
-There is a shared `demos/config.yaml` that all demos inherit from. Each demo can override it with its own `config.yaml`.
-
-The core pattern in every `main.py`:
-
-```python
-# 1. Define tools
-tools = [
-    gradbot.ToolDef(
-        "add_to_order",
-        "Add a pizza to the order",
-        '{"type": "object", "properties": {"pizza": {"type": "string"}}, "required": ["pizza"]}',
-    ),
-]
-
-# 2. Configure the session via an on_start callback
-def on_start(msg: dict) -> gradbot.SessionConfig:
-    return gradbot.SessionConfig(
-        voice_id="NbpkqMVS3CJeq2j8",
-        instructions="You are Marco, a friendly pizzaiolo...",
-        language=gradbot.Lang.En,
-        tools=tools,
-        assistant_speaks_first=True,
-    )
-
-# 3. Handle tool calls
-async def on_tool_call(handle, input_handle, websocket):
-    if handle.name == "add_to_order":
-        order.append(handle.args["pizza"])
-        await handle.send_json({"result": "Added!"})
-
-# 4. Wire it up
-@app.websocket("/ws/chat")
-async def ws_chat(websocket: fastapi.WebSocket):
-    await gradbot.websocket.handle_session(
-        websocket,
-        config=gradbot.config.from_env(),
-        on_start=on_start,
-        on_tool_call=on_tool_call,
-    )
-```
-
-### Tips
-
-- **Start from `simple_chat`** for basic conversations, or **`fantasy_shop`** for tool calling and game state.
-- **Deferred tool calls:** delay `tool_handle.send()` and the AI keeps talking while waiting. See `hotel` for an example.
-- **Voice selection:** any voice from the Gradium voice library can be used by passing its `voice_id` to `SessionConfig`.
-- **Mid-conversation changes:** `input_handle.send_config(new_config)` switches voice, language, or prompt without restarting.
-
-## Integrations
-
-| Category | Services |
-|----------|----------|
-| **STT** | [Gradium](https://gradium.ai) streaming ASR |
-| **TTS** | [Gradium](https://gradium.ai) streaming TTS (full voice library, 5 languages) |
-| **LLM** | Any OpenAI-compatible API: OpenAI, Groq, OpenRouter, Ollama, LM Studio, etc. |
-| **Telephony** | Twilio Media Streams |
-| **Tools** | MCP (Model Context Protocol), Tavily web search, custom JSON Schema tools |
-| **Transport** | WebSocket (OpenAI Realtime API compatible, Twilio protocol) |
-
-## Remote Mode
-
-For hosted deployment, `gradbot_server` runs the STT/LLM/TTS loop on a central server while clients connect over WebSocket. This keeps LLM credentials server-side.
-
-### Running the server
-
-```bash
-cargo run -p gradbot_server -- --config server.toml
-```
-
-Example `server.toml`:
-
-```toml
-addr = "0.0.0.0"
-port = 8080
-gradium_base_url = "https://api.gradium.ai/api"
-
-llm_base_url = "https://api.openai.com/v1"
-llm_api_key = "$LLM_API_KEY"
-llm_model_name = "gpt-4o"
-
-[pinned]
-# Fields listed here override client-provided values
-# llm_extra_config = '{"reasoning": {"effort": "none"}}'
-```
-
-### Connecting from Python
-
-Add to `config.yaml` (no code changes needed):
-
-```yaml
-gradbot_server:
-  url: "wss://your-server.com/ws"
-  api_key: "grd_..."
-```
-
-Or connect explicitly:
-
-```python
-input_handle, output_handle = await gradbot.run(
-    gradbot_url="wss://your-server.com/ws",
-    gradbot_api_key="grd_...",
-    session_config=config,
-    input_format=gradbot.AudioFormat.OggOpus,
-    output_format=gradbot.AudioFormat.OggOpus,
-)
-# Same handles, same API - tool calls, events, everything works identically
-```
-
-## Configuration
-
-Gradbot supports three layers of configuration, applied in order:
-
-| Layer | Format | Used by |
-|-------|--------|---------|
-| Environment variables | `GRADIUM_API_KEY`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL` | All modes |
-| YAML config | `demos/config.yaml` + per-demo overrides | Python demos |
-| TOML config | `configs/gradbot.toml` | Rust server binary |
-
-See [`demos/config.example.yaml`](demos/config.example.yaml) for all available YAML options and [`gradbot_server/config.example.toml`](gradbot_server/config.example.toml) for server configuration.
-
-## Building from Source
-
-### Rust
-
-```bash
-cargo build              # debug
-cargo build --release    # release
-cargo clippy             # lint
-cargo test               # tests
-```
-
-### Python bindings
-
-```bash
-cd demos/simple_chat     # or any demo
-uv sync                  # builds via maturin automatically
-```
-
-To rebuild after Rust changes:
-
-```bash
-uv sync --reinstall-package gradbot
-```
-
-Or use the Makefile:
-
-```bash
-make build DEMO=simple_chat   # build + install into one demo's venv
-make build-all                # build + install into all demo venvs
-make run DEMO=simple_chat     # run with uvicorn (auto-reload, excludes .venv)
-```
-
-### Docker
-
-```bash
-docker build -t gradbot .
-docker run -e GRADIUM_API_KEY=grd_... -e LLM_API_KEY=sk-... -p 8000:8000 gradbot
-```
-
-## Project Structure
-
-```
-gradbot/
-├── gradbot_lib/            # Core Rust library (STT/LLM/TTS multiplexing)
-├── gradbot_py/             # Python bindings (PyO3 + maturin)
-│   └── gradbot/            # Python package (fastapi helpers, config, audio worklet)
-├── gradbot_server/         # Standalone WebSocket server (remote mode)
-├── src/                    # Server binary (OpenAI & Twilio WebSocket protocols)
-├── demos/                  # Example applications
-│   ├── app.py              # Combined app mounting all demos (for Docker)
-│   └── config.example.yaml # Configuration template
-└── configs/                # TOML configs for the Rust server binary
-```
-
-## Python API Reference
-
-See [gradbot_py/README.md](gradbot_py/README.md) for the full Python API documentation.
-
-## Community Contributions
-
-Projects built by the community using Gradbot.
-
-<!-- Add your project below this line, keeping the list alphabetical by project name. -->
-[Dual-LLM Proxy (MiniMax)](https://github.com/davidtaoweiji/gradbot): A Gradbot fork that runs two LLMs in parallel behind an OpenAI-compatible proxy — a fast "stall" model (MiniMax M2-her) streams an immediate acknowledgement while a slower "brain" model (MiniMax M2) produces the real reply with tool calls. Hides brain-model latency by filling the gap with natural-sounding stall speech.
-
-[EchoClaim](https://github.com/IamHetPatel/EchoClaim): We built a call agent that knows the caller, and answers insurance related calls in human-like tone.
-<!-- Example: - [project-name](https://github.com/your-username/your-repo): A one-line description of what it does. -->
-
-Built something with Gradbot? See [COMMUNITY_CONTRIBUTIONS.md](COMMUNITY_CONTRIBUTIONS.md) for instructions on how to open a PR to add your project to this list.
-
-## License
-
-Dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+➡️ [Enterprise support](mailto:help@daily.co) for consulting and support agreements
